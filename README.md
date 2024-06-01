@@ -1,5 +1,6 @@
 # Fairoulette
 
+Realisiert nur random(0,36)
 
 ## Contributors
 
@@ -19,7 +20,7 @@ cmake --install build
 ```
 
 ### Run Server
-`python3 server/src/server.py`
+`python3 server/extra/server.py`
 
 
 ### Run Client

@@ -15,9 +15,10 @@
 ```shell
 cmake -S . -B build/ &&
 cmake --build build/ &&
+cmake --install build
 ```
 
 ### Run Server
-`python3 src/server.py`
+`python3 extra/server.py`
 
 

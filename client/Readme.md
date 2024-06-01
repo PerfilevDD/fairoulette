@@ -19,6 +19,6 @@ cmake --install build
 ```
 
 ### Run Client
-`python3 src/server.py`
+`python3 src/clint.py`
 
 

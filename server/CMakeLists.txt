@@ -26,6 +26,7 @@ include_directories(include)
 include_directories(external)
 
 
+
 #----------------------------------------------#
 #----------Download and use GoogleTest---------#
 #----------------------------------------------#
@@ -111,20 +112,23 @@ file(GLOB SRC_FILES
 ${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 
-pybind11_add_module(calculator
-src/calculator.cpp
-${SRC_FILES}
+pybind11_add_module(fairoulette
+  extra/python_bindings.cpp
+  ${SRC_FILES}
 )
 
 # Installiere Pythonmodul im Verzeichnis '---'
-install(TARGETS calculator
-COMPONENT python
-LIBRARY DESTINATION ${PROJECT_SOURCE_DIR}/src)
+install(TARGETS fairoulette
+  COMPONENT python
+  LIBRARY DESTINATION ${PROJECT_SOURCE_DIR}/extra)
 
 
 #----------------------------------------------#
 #-------------Erzeuge Testprogramme------------#
 #----------------------------------------------#
+
+file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
+add_executable(test1 tests/test1.cpp ${SRC_FILES})
 
 #add_executable(main src/main.cpp)
 #target_link_libraries(main PUBLIC matplot)

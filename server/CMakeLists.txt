@@ -5,7 +5,7 @@
 # Minimale Version des Buildsystems
 cmake_minimum_required(VERSION 3.16)
 # Name des Projekts
-project(ProjectAlpha)
+project(Fairoulette)
 
 
 #----------------------------------------------#
@@ -24,6 +24,7 @@ set(CMAKE_BUILD_TYPE Debug)
 # Füge Includeverzeichnisse hinzu
 include_directories(include)
 include_directories(external)
+
 
 
 #----------------------------------------------#
@@ -57,6 +58,24 @@ include(GoogleTest)
 # Enable GoogleTest
 enable_testing()
 
+
+
+#----------------------------------------------#
+#----------Download and use pybind11-----------#
+#----------------------------------------------#
+
+# Download pybind11
+FetchContent_Declare(
+  pybind11
+  GIT_REPOSITORY https://github.com/pybind/pybind11.git
+  GIT_TAG v2.10.4
+)
+
+# Include pybind11
+FetchContent_MakeAvailable(pybind11)
+
+
+
 #----------------------------------------------#
 #-----------------Add Matplot++----------------#
 #----------------------------------------------#
@@ -69,6 +88,9 @@ if(NOT matplotplusplus_POPULATED)
   FetchContent_Populate(matplotplusplus)
   add_subdirectory(${matplotplusplus_SOURCE_DIR} ${matplotplusplus_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
+
+
+
 #----------------------------------------------#
 #---------------Erzeuge Projekt----------------#
 #----------------------------------------------#
@@ -84,28 +106,29 @@ file(GLOB TEST_FILES
         ${PROJECT_SOURCE_DIR}/tests/datatypes/*.cpp
 )
 
-# Baue das Programm 'demo1' aus den Quellen
-# examples/demo1.cpp und allen Quelldateien in
-# SRC_FILES (also alle im Verzeichnis src/)
+
+# Baue das Programm '---' aus den Quellen
+file(GLOB SRC_FILES
+${PROJECT_SOURCE_DIR}/src/*.cpp)
 
 
+pybind11_add_module(fairoulette
+  extra/python_bindings.cpp
+  ${SRC_FILES}
+)
+
+# Installiere Pythonmodul im Verzeichnis '---'
+install(TARGETS fairoulette
+  COMPONENT python
+  LIBRARY DESTINATION ${PROJECT_SOURCE_DIR}/extra)
 
 
 #----------------------------------------------#
 #-------------Erzeuge Testprogramme------------#
 #----------------------------------------------#
 
-add_executable(datatypes_test
-        ${TEST_FILES}
-        include/container/container.hpp)
-target_link_libraries(datatypes_test GTest::gtest_main)
-gtest_discover_tests(datatypes_test)
+file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
+add_executable(test1 tests/test1.cpp ${SRC_FILES})
 
-add_executable(main src/main.cpp)
-target_link_libraries(main PUBLIC matplot)
-
-add_executable(runtime_test_list src/list_runtime.cpp)
-target_link_libraries(runtime_test_list PUBLIC matplot)
-
-add_executable(runtime_test_stack src/stack_runtime.cpp)
-target_link_libraries(runtime_test_stack PUBLIC matplot)
+#add_executable(main src/main.cpp)
+#target_link_libraries(main PUBLIC matplot)

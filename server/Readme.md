@@ -19,7 +19,9 @@ cmake --install build
 ```
 
 ### Run Server
-`cd extra/`
-`uvicorn server:app --reload`
+```shell
+cd extra/
+uvicorn server:app --reload
+```
 
 

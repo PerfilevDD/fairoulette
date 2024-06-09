@@ -9,7 +9,12 @@ def get_random_number():
         
 def register():
     name = "test3"
-    requests.post(f"{url}/users/", json = {'name': name})
+    try:
+        r = requests.post(f"{url}/users/", json={'name': name})
+        r.raise_for_status()
+        print(r.json())
+    except requests.exceptions.RequestException as e:
+        pass
     
     
 def make_bet():

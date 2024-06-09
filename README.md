@@ -27,11 +27,14 @@ cmake --install build
 ```
 
 ### Run Server
-`python3 server/extra/server.py`
+```shell
+cd server/extra/
+uvicorn server:app --reload
+```
 
 
 ### Run Client
-`python3 client/src/server.py`
+`python3 client/src/gui.py`
 
 
 

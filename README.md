@@ -1,6 +1,7 @@
 # Fairoulette
 
 Realisiert: 
+- Simple GUI mit Knopfen und Wette
 - sqlite: create_user, create_bet; models
 - Funktionen in server.py
 - Zusammenhang python mit c++

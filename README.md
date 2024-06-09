@@ -1,6 +1,10 @@
 # Fairoulette
 
-Realisiert nur random(0,36)
+Realisiert: 
+- sqlite: create_user, create_bet; models
+- Funktionen in server.py
+- Zusammenhang python mit c++
+- random(0,36)
 
 ## Contributors
 

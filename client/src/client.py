@@ -1,17 +1,26 @@
 import requests
+url = "http://localhost:8000"
 
 def get_random_number():
-    url = "http://localhost:25565/get_random_number"
-    #payload = {'x': x, 'y': y}
-    #data = response.json()
-    response = requests.post(url, json={"e":"e"})
+    response = requests.get(f"{url}/get_random_number")
     if response.ok:
         print(response.json())
-    #data = response.json()
-    #return data['result']
+        #print(response.json()['result'])
+        
+def register():
+    name = "test3"
+    requests.post(f"{url}/users/", json = {'name': name})
+    
+    
+def make_bet():
+    user_id = "2"
+    type = "color"
+    value = "black"
+    amount = 10.0
+    requests.post(f"{url}/make_bet/", json = {'user_id': user_id, "type": type, 'value': value, 'amount': amount})
+    
 
 if __name__ == "__main__":
-    while(True):
-        #test_input = input()
-        result = get_random_number()
-        #print(f"Res: {result}")
+    make_bet()
+    #while(True):
+        #result = get_random_number()

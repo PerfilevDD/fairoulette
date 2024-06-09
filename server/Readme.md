@@ -19,6 +19,7 @@ cmake --install build
 ```
 
 ### Run Server
-`python3 extra/server.py`
+`cd extra/`
+`uvicorn server:app --reload`
 
 

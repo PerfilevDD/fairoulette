@@ -1,7 +1,9 @@
 # Fairoulette
 
-Realisiert: 
-- Simple GUI mit Knopfen und Wette
+Realisiert:
+- GUI mit Knopfen und Wette; Registration GUI
+- Sign/Log in Funktionen in Client mir der Aktualisierung von Balance
+- Wette mit Sinchranisation
 - sqlite: create_user, create_bet; models
 - Funktionen in server.py
 - Zusammenhang python mit c++

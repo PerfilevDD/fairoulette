@@ -35,7 +35,16 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 # get bet from user
 @app.post("/make_bet/", response_model=schemas.Bet)
 def create_bet(bet: schemas.BetCreate, db: Session = Depends(get_db)):
+    user = crud.get_user_id(db, bet.user_id)
+    user.balance = user.balance - bet.amount # Balance --
     return crud.create_bet(db=db, user_id=bet.user_id, type=bet.type, value=bet.value, amount=bet.amount)
+
+@app.get("/users/{name}", response_model=schemas.User)
+def read_user(name: str, db: Session = Depends(get_db)):
+    db_user = crud.get_user_name(db, name)
+    if db_user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return db_user
 
 '''
 # give a result to user

@@ -4,12 +4,15 @@ import database.models as models
 import database.schemas as schemas
 
 
-def get_user(db: Session, user_id: int):
-    return db.query(models.User).filter(models.User.id == user_id).first()
+def get_user_name(db: Session, name: str):
+    return db.query(models.User).filter(models.User.name == name).first()
+
+def get_user_id(db: Session, id: int):
+    return db.query(models.User).filter(models.User.id == id).first()
 
 
-def bet_result(db: Session, user_id: int):
-    return db.query(models.Bet).filter(models.User.id == user_id).first()
+def bet_result(db: Session, id: int):
+    return db.query(models.Bet).filter(models.User.id == id).first()
 
 
 def get_users(db: Session, skip: int = 0, limit: int = 100):
@@ -17,7 +20,7 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 
 
 def create_user(db: Session, name: str):
-    db_user = models.User(name=name, balance = 0.0)
+    db_user = models.User(name=name, balance = 100.0)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)

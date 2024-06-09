@@ -26,6 +26,6 @@ def make_bet():
     
 
 if __name__ == "__main__":
-    make_bet()
+    register()
     #while(True):
         #result = get_random_number()

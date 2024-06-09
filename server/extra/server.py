@@ -37,6 +37,17 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 def create_bet(bet: schemas.BetCreate, db: Session = Depends(get_db)):
     return crud.create_bet(db=db, user_id=bet.user_id, type=bet.type, value=bet.value, amount=bet.amount)
 
+'''
+# give a result to user
+@app.get("/result/{user_id}/", response_model=schemas.Bet)
+def bet_result(user_id: int, balance, db: Session = Depends(get_db)):
+    return crud.create_bet(db=db, user_id=bet.user_id, type=bet.type, value=bet.value, amount=bet.amount)
+
+@app.post("/users/{user_id}/items/", response_model=schemas.Item)
+def create_item_for_user(id: int, item: schemas.ItemCreate, db: Session = Depends(get_db)):
+    return crud.create_user_item(db=db, item=item, user_id=user_id)
+'''
+
 @app.get('/get_random_number')
 async def get_random_number():
     randomizer = Randomizer()

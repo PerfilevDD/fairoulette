@@ -7,6 +7,7 @@ url = "http://localhost:8000"
 # Global
 balance = 0.0
 user_id = 0
+random = 0
 
 def check_user(name):
     try:
@@ -22,7 +23,7 @@ def register_user():
     global user_id
     name = entry_name.get()
     if not name:
-        messagebox.showwarning("name blyat")
+        messagebox.showwarning("", "name blyat")
         return
     
     user_data = check_user(name)
@@ -31,7 +32,7 @@ def register_user():
         # User exists
         user_id = user_data['id']
         balance = user_data['balance']
-        messagebox.showinfo(f"{name} vietnam!!1")
+        messagebox.showinfo("", f"{name} vietnam!!1")
         login_window.destroy()
         open_game_window()
     else:
@@ -39,20 +40,17 @@ def register_user():
             r = requests.post(f"{url}/users/", json={'name': name})
             r.raise_for_status()
             print(r.json())
-            messagebox.showinfo("f {name} yesss")
+            messagebox.showinfo("", "f {name} yesss")
             
             # Daten for local
             balance = 100.0
             user_id = r.json()['id']
             
-            login_window.destroy() 
+            login_window.destroy()
+            update_random_label() 
             open_game_window()
         except requests.exceptions.RequestException as e:
-            messagebox.showerror(f"{e}")
-            
-            # Delete this late blyat (for debbuging)
-            login_window.destroy() 
-            open_game_window()
+            messagebox.showerror("", f"No internet, NO!1")
 
 
 # Make a bet with a number
@@ -75,18 +73,19 @@ def make_bet_digit(number, feet):
     
     
     if amount > balance:
-        messagebox.showwarning("u haven't enouht money blyat")
+        messagebox.showwarning("", "u haven't enouht money blyat")
     elif (amount < 0) and (str(user_id) != '777'):
-        messagebox.showwarning("are u hacker blyat?")
+        messagebox.showwarning("", "are u hacker blyat?")
     elif amount == 0:
-        messagebox.showwarning("ZERO?")
+        messagebox.showwarning("", "ZERO?")
     else:
         try:
             r = requests.post(f"{url}/make_bet/", json = {'user_id': str(user_id), "type": type, 'value': value, 'amount': amount})
             r.raise_for_status()
             balance = balance - amount # minus money
-            print(balance)
+            print(r)
             update_balance_label()
+            update_random_label()
         except requests.exceptions.RequestException as e:
             pass
     
@@ -107,23 +106,39 @@ def open_login_window():
     login_window.mainloop()
     
 def update_balance_label():
-    balance_label.config(text=str(balance))
+    balance_label.config(text=f"Balance: {str(balance)}")
+    
+    
+def update_random_label():
+    try:
+        r = requests.get(f"{url}/get_result/")
+        r.raise_for_status()
+        random = r.json()['result']
+        random_label.config(text=f"Random: {str(random)}")
+            
+    except requests.exceptions.RequestException as e:
+        messagebox.showerror("", f"{e}")
+    
 
     
 def open_game_window():
-    global root, balance_label
+    global root, balance_label, random, random_label
     # Main window
     root = Tk()
     root.title("Fairoulette")
 
     # Window settings
-    mainframe = ttk.Frame(root, padding="5 5 15 15")
+    mainframe = ttk.Frame(root, padding="10 10 20 20")
     mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
 
     # Entry a bet
     feet = StringVar()
+    
+    Wert_label = ttk.Label(mainframe, text=f"Wert:")
+    Wert_label.grid(column=1, row=1, sticky=(W, E))
+    
     feet_entry = ttk.Entry(mainframe, width=7, textvariable=feet)
     feet_entry.grid(column=2, row=1, sticky=(W, E))
 
@@ -139,13 +154,15 @@ def open_game_window():
     for row in rows:
         row_numbers = row_numbers + 1
         for i in row:
-                ttk.Button(mainframe, text=f"{i}", command=lambda i=i: make_bet_digit(i, feet)).grid(column=i+row_numbers+10, row=row_numbers+10, sticky=W)
+                ttk.Button(mainframe, text=f"{i}", command=lambda i=i: make_bet_digit(i, feet)).grid(column=i+row_numbers+40, row=row_numbers+400, sticky=(W, E))
         
 
-    balance_label = ttk.Label(mainframe, text=str(balance))
-    balance_label.grid(column=2, row=2, sticky=W)
-    #ttk.Label(mainframe, text="is equivalent to").grid(column=1, row=2, sticky=E)
-    #ttk.Label(mainframe, text="meters").grid(column=3, row=2, sticky=W)
+    balance_label = ttk.Label(mainframe, text=f"Balance: {str(balance)}")
+    balance_label.grid(column=20, row=2, sticky=(W, E))
+    
+    random_label = ttk.Label(mainframe, text=f"Random: {str(random)}")
+    random_label.grid(column=20, row=1, sticky=(W, E))
+    
 
     #for child in mainframe.winfo_children(): 
     #   child.grid_configure(padx=5, pady=5)

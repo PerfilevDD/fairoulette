@@ -111,7 +111,9 @@ file(GLOB TEST_FILES
 
 # Baue das Programm '---' aus den Quellen
 file(GLOB SRC_FILES
-${PROJECT_SOURCE_DIR}/src/*.cpp)
+${PROJECT_SOURCE_DIR}/src/*.cpp
+${PROJECT_SOURCE_DIR}/src/table/*.cpp
+${PROJECT_SOURCE_DIR}/src/bet/*.cpp)
 
 
 pybind11_add_module(fairoulette

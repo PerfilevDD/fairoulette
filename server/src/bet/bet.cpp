@@ -1,31 +1,33 @@
 #include "bet/bet.hpp"
 
-Bet::Bet(int pid): pid(pid) {}
+namespace Fairoulette {
+    
+Bet::Bet(int pid) : pid(pid) {}
 
-void Bet::add_black_bet(int worth) {
+void Bet::add_black_bet(float worth) {
     this->outside_bets.black += worth;
 }
 
-void Bet::add_red_bet(int worth) {
+void Bet::add_red_bet(float worth) {
     this->outside_bets.red += worth;
 }
 
-void Bet::add_even_bet(int worth) {
+void Bet::add_even_bet(float worth) {
     this->outside_bets.even += worth;
 }
 
-void Bet::add_odd_bet(int worth) {
+void Bet::add_odd_bet(float worth) {
     this->outside_bets.odd += worth;
 }
 
-void Bet::add_number_bet(int number, int worth) {
-    if (!(number >= 0 && number <= 36)){
+void Bet::add_number_bet(int number, float worth) {
+    if (!(number >= 0 && number <= 36)) {
         // TODO: Throw error for not in bounds
     }
     number_bets[number] += worth;
 }
 
-void Bet::add_col_bet(int col, int worth) {
+void Bet::add_col_bet(int col, float worth) {
     switch (col) {
         case 1:
             outside_bets.col1 += worth;
@@ -42,7 +44,7 @@ void Bet::add_col_bet(int col, int worth) {
     }
 }
 
-void Bet::add_dozen_bet(int dozen, int worth) {
+void Bet::add_dozen_bet(int dozen, float worth) {
     switch (dozen) {
         case 1:
             outside_bets.dozen1 += worth;
@@ -57,9 +59,9 @@ void Bet::add_dozen_bet(int dozen, int worth) {
             // Todo: Throw error
             break;
     }
-
 }
 
 int Bet::calculate_result(int number) {
     return 0;
 }
+}  // namespace Fairoulette

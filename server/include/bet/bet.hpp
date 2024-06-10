@@ -2,6 +2,7 @@
 
 #include "array"
 
+namespace Fairoulette {
 struct OutsideBets {
     int odd = 0;
     int even = 0;
@@ -18,30 +19,28 @@ struct OutsideBets {
 };
 
 class Bet {
-public:
+   public:
     Bet(int pid);
     int calculate_result(int number);
-    void add_number_bet(int number, int worth);
-    void add_red_bet(int worth);
-    void add_black_bet(int worth);
-    void add_even_bet(int worth);
-    void add_odd_bet(int worth);
-    void add_col_bet(int col, int worth);
-    void add_dozen_bet(int dozen, int worth);
+    void add_number_bet(int number, float worth);
+    void add_red_bet(float worth);
+    void add_black_bet(float worth);
+    void add_even_bet(float worth);
+    void add_odd_bet(float worth);
+    void add_col_bet(int col, float worth);
+    void add_dozen_bet(int dozen, float worth);
 
     std::array<int, 37> get_number_bets() {
         return number_bets;
     }
 
-    int get_pid(){
+    int get_pid() {
         return pid;
     }
 
-
-
-private:
+   private:
     std::array<int, 37> number_bets = {};
     struct OutsideBets outside_bets = {};
     int pid;
-
 };
+}  // namespace Fairoulette

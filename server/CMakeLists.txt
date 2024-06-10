@@ -100,6 +100,8 @@ endif()
 # die in Verzeichnis src/ liegen.
 file(GLOB SRC_FILES
   ${PROJECT_SOURCE_DIR}/src/*.cpp
+  ${PROJECT_SOURCE_DIR}/src/table/*.cpp
+  ${PROJECT_SOURCE_DIR}/src/bet/*.cpp
         )
 
 file(GLOB TEST_FILES
@@ -109,7 +111,9 @@ file(GLOB TEST_FILES
 
 # Baue das Programm '---' aus den Quellen
 file(GLOB SRC_FILES
-${PROJECT_SOURCE_DIR}/src/*.cpp)
+${PROJECT_SOURCE_DIR}/src/*.cpp
+${PROJECT_SOURCE_DIR}/src/table/*.cpp
+${PROJECT_SOURCE_DIR}/src/bet/*.cpp)
 
 
 pybind11_add_module(fairoulette
@@ -128,7 +132,9 @@ install(TARGETS fairoulette
 #----------------------------------------------#
 
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
-add_executable(test1 tests/test1.cpp ${SRC_FILES})
+add_executable(test1 tests/test1.cpp ${SRC_FILES}
+        src/bet/bet.cpp
+        include/table/table.hpp)
 
 #add_executable(main src/main.cpp)
 #target_link_libraries(main PUBLIC matplot)

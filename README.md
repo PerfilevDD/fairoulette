@@ -20,6 +20,11 @@ Realisiert:
 - Felix Boes: Dessen Vorlesungen die Grundlage für dieses Projekt bilden.
 
 ## Setup for Server/Client
+Install Requirements:
+```shell
+pip install -r requirements.txt
+```
+
 ```shell
 cmake -S . -B build/ &&
 cmake --build build/ &&

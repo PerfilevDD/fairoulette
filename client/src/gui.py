@@ -184,5 +184,5 @@ def is_black(i):
     else:
         return "#8B0000"
     
-open_game_window()
-#open_login_window()
+#open_game_window()
+open_login_window()

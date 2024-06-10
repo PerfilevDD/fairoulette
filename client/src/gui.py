@@ -122,13 +122,13 @@ def update_random_label():
 
     
 def open_game_window():
-    global root, balance_label, random, random_label
+    global root, balance_label, random, random_label, black
     # Main window
     root = Tk()
     root.title("Fairoulette")
 
     # Window settings
-    mainframe = ttk.Frame(root, padding="10 10 20 20")
+    mainframe = ttk.Frame(root, padding="10 10 30 30")
     mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
@@ -146,6 +146,10 @@ def open_game_window():
     #ttk.Label(mainframe, textvariable=meters).grid(column=2, row=2, sticky=(W, E))
 
     # Gameboard
+    Button(mainframe, text=f"{0}", command=lambda i=0: make_bet_digit(i, feet), width=4, height=8,bg="green", fg="white").grid(column=20, row=11, sticky=(S, E))
+    
+    black = [2,4,6,8,10,11,13,15,17,20,22,24,27,29,30,32,34,36]
+    
     f_row = [3,6,9,12,15,18,21,24,28,31,34,37]
     s_row = [2,5,8,11,14,17,20,23,27,30,33,36]
     th_row = [1,4,7,10,13,16,19,22,26,29,32,35]
@@ -154,7 +158,8 @@ def open_game_window():
     for row in rows:
         row_numbers = row_numbers + 1
         for i in row:
-                ttk.Button(mainframe, text=f"{i}", command=lambda i=i: make_bet_digit(i, feet)).grid(column=i+row_numbers+40, row=row_numbers+400, sticky=(W, E))
+                color = is_black(i)
+                Button(mainframe, text=f"{i}", command=lambda i=i: make_bet_digit(i, feet), width=4, height=2,bg=color, fg="white").grid(column=i+row_numbers+20, row=row_numbers+10, sticky=(S, E))
         
 
     balance_label = ttk.Label(mainframe, text=f"Balance: {str(balance)}")
@@ -171,5 +176,13 @@ def open_game_window():
 
     root.mainloop()
     
-#open_game_window()
-open_login_window()
+    
+
+def is_black(i):
+    if i in black:
+        return 'black'
+    else:
+        return "#8B0000"
+    
+open_game_window()
+#open_login_window()

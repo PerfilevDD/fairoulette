@@ -128,7 +128,8 @@ install(TARGETS fairoulette
 #----------------------------------------------#
 
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
-add_executable(test1 tests/test1.cpp ${SRC_FILES})
+add_executable(test1 tests/test1.cpp ${SRC_FILES}
+        src/bet/bet.cpp)
 
 #add_executable(main src/main.cpp)
 #target_link_libraries(main PUBLIC matplot)

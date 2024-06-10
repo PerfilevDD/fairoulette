@@ -19,7 +19,7 @@ struct OutsideBets {
 
 class Bet {
 public:
-    Bet();
+    Bet(int pid);
     int calculate_result(int number);
     void add_number_bet(int number, int worth);
     void add_red_bet(int worth);
@@ -33,8 +33,15 @@ public:
         return number_bets;
     }
 
+    int get_pid(){
+        return pid;
+    }
+
+
+
 private:
     std::array<int, 37> number_bets = {};
     struct OutsideBets outside_bets = {};
+    int pid;
 
 };

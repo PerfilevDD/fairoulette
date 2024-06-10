@@ -100,6 +100,8 @@ endif()
 # die in Verzeichnis src/ liegen.
 file(GLOB SRC_FILES
   ${PROJECT_SOURCE_DIR}/src/*.cpp
+  ${PROJECT_SOURCE_DIR}/src/table/*.cpp
+  ${PROJECT_SOURCE_DIR}/src/bet/*.cpp
         )
 
 file(GLOB TEST_FILES
@@ -129,7 +131,8 @@ install(TARGETS fairoulette
 
 file(GLOB SRC_FILES ${PROJECT_SOURCE_DIR}/src/*.cpp)
 add_executable(test1 tests/test1.cpp ${SRC_FILES}
-        src/bet/bet.cpp)
+        src/bet/bet.cpp
+        include/table/table.hpp)
 
 #add_executable(main src/main.cpp)
 #target_link_libraries(main PUBLIC matplot)

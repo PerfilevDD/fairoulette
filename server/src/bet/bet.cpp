@@ -1,6 +1,6 @@
 #include "bet/bet.hpp"
 
-Bet::Bet() {}
+Bet::Bet(int pid): pid(pid) {}
 
 void Bet::add_black_bet(int worth) {
     this->outside_bets.black += worth;

@@ -3,6 +3,7 @@ from fairoulette import Randomizer, Bet, Table  # type: ignore
 
 from sqlalchemy.orm import Session
 from starlette.responses import RedirectResponse
+from typing import Optional
 
 import database.models as models
 import database.database as database
@@ -13,7 +14,7 @@ import asyncio
 import time
 import threading
 
-table = Table()
+tables: list[Table] = []
 
 app = FastAPI(
     title="Fairroulette"
@@ -35,25 +36,32 @@ def get_db():
 
 
 # create new user
-@app.post("/users/", response_model=schemas.User)
+@app.post("/users", response_model=schemas.User, tags=["User"])
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return crud.create_user(db=db, name=user.name)
 
 
 # get bet from user
-@app.post("/make_bet/", response_model=schemas.Bet)
-def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
+@app.post("/bet", response_model=schemas.Bet, tags=["Bet"])
+def create_bet(bet: schemas.BetBase, bet_id: Optional[int], db: Session = Depends(get_db)):
     print(bet)
     user = crud.get_user_id(db, bet.user_id)
     print(bet.user_id)
-    new_bet = Bet(user.id)
+
+    db_bet = crud.create_bet(db=db, user_id=bet.user_id, type=bet.type, value=bet.value, amount=bet.amount)
+    new_bet = Bet(user.id, db_bet.id)
     if bet.type == 'number':
         new_bet.add_number_bet(int(bet.value), bet.amount)
     table.add_or_update_bet_for_participant(bet.user_id, new_bet)
-    return crud.create_bet(db=db, user_id=bet.user_id, type=bet.type, value=bet.value, amount=bet.amount)
+
+    return {
+        "bet_id": db_bet.id
+    }
 
 
-@app.get("/users/{name}", response_model=schemas.User)
+
+
+@app.get("/users/{name}", response_model=schemas.User, tags=["User"])
 def read_user(name: str, db: Session = Depends(get_db)):
     db_user = crud.get_user_name(db, name)
     if db_user is None:
@@ -62,19 +70,31 @@ def read_user(name: str, db: Session = Depends(get_db)):
 
 
 # give a result to user
-@app.get("/get_result/{user_id}/", response_model=schemas.Bet)
+@app.get("/get_result/{user_id}/", response_model=schemas.Bet, tags=["Bet"])
 def get_result(user_id: int, db: Session = Depends(get_db)):
     user = crud.get_user_id(db, user_id)
     return user
 
 
 #
-@app.get("/get_result/")
+@app.get("/get_result")
 async def post_random():
     print(f'{result_random}')
     return {'result': result_random}
 
+@app.get("/tables", tags=["Table"])
+async def get_tables(db: Session = Depends(get_db)):
 
+    return {
+        "tables": [table.id for table in crud.get_tables(db)]
+    }
+
+@app.post("/table", tags=["Table"])
+async def create_table(db: Session = Depends(get_db)):
+    table = crud.create_table(db)
+    return {
+        "table": table.id
+    }
 @app.get("/", include_in_schema=False)
 async def redirect():
     return RedirectResponse(url="/docs")
@@ -84,10 +104,13 @@ async def run_roulette_game():
     global result_random
     while True:
         await asyncio.sleep(5)
-        result_random = table.calculate_result()
-        print(f"{result_random}")
+        for table in tables:
+            result_random = table.calculate_result()
+            print(f"Table: {table.get_table_id()} - Result: {result_random}")
 
 
 @app.on_event("startup")
 async def startup_event():
+    for table in crud.get_tables(next(get_db())):
+        tables.append(Table(table.id))
     asyncio.create_task(run_roulette_game())

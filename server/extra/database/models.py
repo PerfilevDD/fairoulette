@@ -26,6 +26,8 @@ class RouletteTable(Base):
     id = Column(Integer, primary_key=True, index=True)
 
 class BalanceUpdate(Base):
+    __tablename__ = "BalanceUpdate"
+
     bet_id = Column(Integer, primary_key=True)
     user_id = Column(Integer, primary_key=True)
     table_id = Column(Integer, primary_key=True)

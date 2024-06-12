@@ -34,4 +34,11 @@ def create_bet(db: Session, user_id: int, type: str, value: str, amount: float):
     db.refresh(db_bet)
     return db_bet
 
+def create_table(db: Session):
+    db_table = models.RouletteTable()
+    db.add(db_table)
+    db.commit()
+    db.refresh(db_table)
+    return db_table
+
 

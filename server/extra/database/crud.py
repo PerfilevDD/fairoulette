@@ -28,8 +28,8 @@ def create_user(db: Session, name: str):
     return db_user
 
 
-def create_bet(db: Session, user_id: int, type: str, value: str, amount: float):
-    db_bet = models.Bet(user_id=user_id, type=type, value=value, amount=amount)
+def create_bet(db: Session, user_id: int, table_id: int, type: str, value: str, amount: float):
+    db_bet = models.Bet(user_id=user_id, table_id=table_id, type=type, value=value, amount=amount)
     db.add(db_bet)
     db.commit()
     db.refresh(db_bet)

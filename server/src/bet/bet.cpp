@@ -6,7 +6,7 @@ bool _is_even(int number) {
 
 namespace Fairoulette {
     
-    Bet::Bet(int pid) : pid(pid) {}
+    Bet::Bet(int user_id, int bet_id) : user_id(user_id), bet_id(bet_id) {}
 
     void Bet::add_black_bet(float worth) {
         this->outside_bets.black += worth;

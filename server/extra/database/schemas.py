@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 # Bet
 class BetBase(BaseModel):
+    table_id: int
     user_id: int
     type: str
     value: str

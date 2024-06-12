@@ -20,7 +20,7 @@ struct OutsideBets {
 
 class Bet {
    public:
-    Bet(int pid);
+    Bet(int user_id, int bet_id);
     int calculate_result(int number);
     void add_number_bet(int number, float worth);
     void add_red_bet(float worth);
@@ -34,13 +34,18 @@ class Bet {
         return number_bets;
     }
 
-    int get_pid() {
-        return pid;
+    int get_user_id() {
+        return user_id;
+    }
+
+    int get_bet_id () {
+        return bet_id;
     }
 
    private:
     std::array<int, 37> number_bets = {};
     struct OutsideBets outside_bets = {};
-    int pid;
+    int user_id;
+    int bet_id;
 };
 }  // namespace Fairoulette

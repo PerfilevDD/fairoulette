@@ -8,7 +8,7 @@ int main(){
 
     printf("%d\n", x);
 
-    Fairoulette::Bet bet(2);
+    Fairoulette::Bet bet(2, 2);
     bet.add_black_bet(1);
     bet.add_number_bet(1, 1);
 

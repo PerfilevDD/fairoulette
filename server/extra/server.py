@@ -43,20 +43,19 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 
 # get bet from user
 @app.post("/bet", response_model=schemas.Bet, tags=["Bet"])
-def create_bet(bet: schemas.BetBase, bet_id: Optional[int], db: Session = Depends(get_db)):
-    print(bet)
-    user = crud.get_user_id(db, bet.user_id)
-    print(bet.user_id)
+def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
 
-    db_bet = crud.create_bet(db=db, user_id=bet.user_id, type=bet.type, value=bet.value, amount=bet.amount)
-    new_bet = Bet(user.id, db_bet.id)
+    db_bet = crud.create_bet(db=db, user_id=bet.user_id, table_id=bet.table_id, type=bet.type, value=bet.value, amount=bet.amount)
+    new_bet = Bet(bet.user_id, db_bet.id)
     if bet.type == 'number':
         new_bet.add_number_bet(int(bet.value), bet.amount)
-    table.add_or_update_bet_for_participant(bet.user_id, new_bet)
+    print(bet.table_id)
+    tables[bet.table_id].add_or_update_bet_for_participant(bet.user_id, new_bet)
+    
+    user = crud.get_user_id(db, bet.user_id)
+    user.balance -= bet.amount
 
-    return {
-        "bet_id": db_bet.id
-    }
+    return crud.create_bet(db=db, user_id=bet.user_id, table_id=bet.table_id, type=bet.type, value=bet.value, amount=bet.amount)
 
 
 

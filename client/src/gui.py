@@ -23,7 +23,7 @@ def register_user():
     global user_id
     name = entry_name.get()
     if not name:
-        messagebox.showwarning("", "name blyat")
+        messagebox.showwarning("", "Wir sollen deinen Namen wissen, looser")
         return
     
     user_data = check_user(name)
@@ -32,7 +32,7 @@ def register_user():
         # User exists
         user_id = user_data['id']
         balance = user_data['balance']
-        messagebox.showinfo("", f"{name} vietnam!!1")
+        messagebox.showinfo("", f"{name} bist du bereit zu verlieren (wieder)?")
         login_window.destroy()
         open_game_window()
     else:
@@ -40,17 +40,16 @@ def register_user():
             r = requests.post(f"{url}/users/", json={'name': name})
             r.raise_for_status()
             print(r.json())
-            messagebox.showinfo("", "f {name} yesss")
+            messagebox.showinfo("", f"Willkommen, {name}, in the best Fairoulette in the world")
             
             # Daten for local
             balance = 100.0
             user_id = r.json()['id']
             
             login_window.destroy()
-            update_random_label() 
             open_game_window()
         except requests.exceptions.RequestException as e:
-            messagebox.showerror("", f"No internet, NO!1")
+            messagebox.showerror("", f"No Internet")
 
 
 # Make a bet with a number
@@ -73,17 +72,17 @@ def make_bet_digit(number, feet):
     
     
     if amount > balance:
-        messagebox.showwarning("", "u haven't enouht money blyat")
+        messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname + Betrag (Optional)")
     elif (amount < 0) and (str(user_id) != '777'):
-        messagebox.showwarning("", "are u hacker blyat?")
+        messagebox.showwarning("", "are u hacker?")
     elif amount == 0:
         messagebox.showwarning("", "ZERO?")
     else:
         try:
-            r = requests.post(f"{url}/make_bet/", json = {'user_id': str(user_id), "type": type, 'value': value, 'amount': amount})
+            table_id = 2 # hard prog
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id, "type": type, 'value': value, 'amount': amount})
             r.raise_for_status()
-            balance = balance - amount # minus money
-            print(r)
+            balance -= amount # minus money
             update_balance_label()
             update_random_label()
         except requests.exceptions.RequestException as e:
@@ -100,7 +99,7 @@ def open_login_window():
     entry_name = Entry(login_window)
     entry_name.grid(row=0, column=1, padx=20, pady=5)
 
-    button_register = Button(login_window, text="reg", command=register_user)
+    button_register = Button(login_window, text="Auth", command=register_user)
     button_register.grid(row=1, columnspan=2, pady=20)
 
     login_window.mainloop()

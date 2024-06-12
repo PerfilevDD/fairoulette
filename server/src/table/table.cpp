@@ -5,7 +5,7 @@
 
 namespace Fairoulette {
 
-Table::Table() {}
+Table::Table(int table_id): table_id(table_id) {}
 
 int Table::calculate_result() {
     Fairoulette::Randomizer rand;
@@ -18,7 +18,7 @@ int Table::calculate_result() {
 
 void Table::add_or_update_bet_for_participant(int pid, Bet bet) {
     for (auto it = bets.begin(); it != bets.end(); ++it) {
-        if (it->get_pid() == pid) {
+        if (it->get_user_id() == pid) {
             bets.erase(it);
             break;
         }

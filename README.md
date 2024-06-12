@@ -22,10 +22,12 @@ Realisiert:
 ## Setup for Server/Client
 Install Requirements:
 ```shell
+
 pip install -r requirements.txt
 ```
 
 ```shell
+cd server &&
 cmake -S . -B build/ &&
 cmake --build build/ &&
 cmake --install build

@@ -8,6 +8,7 @@ url = "http://localhost:8000"
 balance = 0.0
 user_id = 0
 random = 0
+table_id = 0
 
 def check_user(name):
     try:
@@ -34,7 +35,7 @@ def register_user():
         balance = user_data['balance']
         messagebox.showinfo("", f"{name} bist du bereit zu verlieren (wieder)?")
         login_window.destroy()
-        open_game_window()
+        open_table_window()
     else:
         try:
             r = requests.post(f"{url}/users/", json={'name': name})
@@ -47,14 +48,14 @@ def register_user():
             user_id = r.json()['id']
             
             login_window.destroy()
-            open_game_window()
+            open_table_window()
         except requests.exceptions.RequestException as e:
             messagebox.showerror("", f"No Internet")
 
 
 # Make a bet with a number
 def make_bet_digit(number, feet):
-    global balance, user_id
+    global balance, user_id, table_id
     print(user_id)
     
     type = "number"
@@ -79,8 +80,7 @@ def make_bet_digit(number, feet):
         messagebox.showwarning("", "ZERO?")
     else:
         try:
-            table_id = 2 # hard prog
-            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id, "type": type, 'value': value, 'amount': amount})
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': value, 'amount': amount})
             r.raise_for_status()
             balance -= amount # minus money
             update_balance_label()
@@ -117,6 +117,51 @@ def update_random_label():
             
     except requests.exceptions.RequestException as e:
         messagebox.showerror("", f"{e}")
+    
+def open_table_window():
+    global table_windows
+    table_windows = Tk()
+    table_windows.title("Choose Table")
+    
+    #choose_table()
+    
+
+    label_table = Label(table_windows, text="Tables")
+    label_table.grid(row=0, column=0, padx=20, pady=5)
+
+
+    button_update = Button(table_windows, text="update", command=update_tables)
+    button_update.grid(row=0, columnspan=2, pady=20)
+
+    table_windows.mainloop()
+
+def choose_table(table):
+    global table_id, table_windows
+    table_id = table  
+    
+    table_windows.destroy()
+    open_game_window() 
+    
+def update_tables():
+    global table_id
+    
+    try:
+        r = requests.get(f"{url}/tables")
+        r.raise_for_status()
+        tables_arr = r.json()['tables']
+        for table in tables_arr:
+            label_table_choose = Label(table_windows, text="          ")
+            label_table_choose.grid(row=4, column=table, padx=20, pady=5)
+            
+            Button(table_windows, text=f"Table {table}", command=lambda table=table: choose_table(table)).grid(row=6, columnspan=table, sticky=(S, E))
+         
+            
+        
+        
+        #login_window.destroy()
+        #open_game_window()
+    except requests.exceptions.RequestException as e:
+        messagebox.showerror("", f"No Internet")
     
 
     
@@ -167,6 +212,9 @@ def open_game_window():
     random_label = ttk.Label(mainframe, text=f"Random: {str(random)}")
     random_label.grid(column=20, row=1, sticky=(W, E))
     
+    table_label = ttk.Label(mainframe, text=f"Table: {str(table_id)}")
+    table_label.grid(column=20, row=3, sticky=(W, E))
+    
 
     #for child in mainframe.winfo_children(): 
     #   child.grid_configure(padx=5, pady=5)
@@ -185,3 +233,5 @@ def is_black(i):
     
 #open_game_window()
 open_login_window()
+
+#open_table_window()

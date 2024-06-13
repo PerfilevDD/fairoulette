@@ -5,10 +5,10 @@ import requests
 url = "http://localhost:8000"
 
 # Global
-balance = 0.0
-user_id = 0
-random = 0
-table_id = 0
+balance = 0.0        # Hält das aktuelle Guthaben des Spielers 
+user_id = 0          # Speichert die ID des aktuellen Benutzers 
+random = 0           # Speichert eine zufällige Zahl "das letzte Ergebnis des Roulettrads"
+table_id = 0         # Tisch-ID
 
 def check_user(name):
     try:
@@ -16,14 +16,14 @@ def check_user(name):
         r.raise_for_status()
         return r.json()
     except requests.exceptions.RequestException:
-        return None
+        return None     # Bei einem Fehler wird "None" zurückgegeben
 
 
-def register_user():
+def register_user():     # wird aufgerufen, wenn sich ein Benutzer angemeldet hat bzw. anmeldet
     global balance
     global user_id
     name = entry_name.get()
-    if not name:
+    if not name:         # Überprüft, ob der Name eingegeben wurde, und registriert den Benutzer über das Backend, wenn er noch nicht existiert.
         messagebox.showwarning("", "Wir sollen deinen Namen wissen, looser")
         return
     
@@ -53,8 +53,8 @@ def register_user():
             messagebox.showerror("", f"No Internet")
 
 
-# Make a bet with a number
-def make_bet_digit(number, feet):
+# Make a bet with a number          # Spiellogik
+def make_bet_digit(number, feet):   # Ermöglicht es dem Spieler, auf eine spezifische Zahl zu wetten
     global balance, user_id, table_id
     print(user_id)
     
@@ -72,7 +72,7 @@ def make_bet_digit(number, feet):
     print(number)
     
     
-    if amount > balance:
+    if amount > balance:    # Überprüft, ob das Wettgeld im erlaubten Rahmen des aktuellen Guthabens liegt.
         messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname + Betrag (Optional)")
     elif (amount < 0) and (str(user_id) != '777'):
         messagebox.showwarning("", "are u hacker?")
@@ -88,7 +88,7 @@ def make_bet_digit(number, feet):
         except requests.exceptions.RequestException as e:
             pass
     
-def open_login_window():
+def open_login_window():    #Erstellt ein Anmeldefenster, in dem der Benutzer seinen Namen eingeben und sich authentifizieren kann. 
     global login_window, entry_name
     login_window = Tk()
     login_window.title("Reg")
@@ -118,7 +118,7 @@ def update_random_label():
     except requests.exceptions.RequestException as e:
         messagebox.showerror("", f"{e}")
     
-def open_table_window():
+def open_table_window(): 
     global table_windows
     table_windows = Tk()
     table_windows.title("Choose Table")
@@ -165,7 +165,8 @@ def update_tables():
     
 
     
-def open_game_window():
+def open_game_window():       # Erstellt das Hauptfenster des Spiels, in dem der Benutzer Wetten platzieren kann.
+                              # Initialisiert Schaltflächen für jede Zahl auf dem Rouletterad und färbt diese entsprechend der Zugehörigkeit zur Kategorie "Schwarz" oder "Rot".
     global root, balance_label, random, random_label, black
     # Main window
     root = Tk()
@@ -225,7 +226,7 @@ def open_game_window():
     
     
 
-def is_black(i):
+def is_black(i):       #Hilfsfunktion, die bestimmt, ob eine Zahl schwarz ist, basierend auf einer vorgegebenen Liste von schwarzen Zahlen.
     if i in black:
         return 'black'
     else:

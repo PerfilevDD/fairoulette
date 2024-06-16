@@ -80,7 +80,7 @@ def make_bet_digit(number, feet):   # Ermöglicht es dem Spieler, auf eine spezi
         messagebox.showwarning("", "ZERO?")
     else:
         try:
-            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': value, 'amount': amount})
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id, "type": type, 'value': value, 'amount': amount})
             r.raise_for_status()
             balance -= amount # minus money
             update_balance_label()
@@ -110,7 +110,7 @@ def update_balance_label():
     
 def update_random_label():
     try:
-        r = requests.get(f"{url}/get_result/")
+        r = requests.get(f"{url}/get_result/{table_id}")
         r.raise_for_status()
         random = r.json()['result']
         random_label.config(text=f"Random: {str(random)}")

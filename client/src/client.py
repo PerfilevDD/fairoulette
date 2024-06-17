@@ -7,7 +7,7 @@ from PIL import Image, ImageTk
 url = "http://localhost:8000"
 
 # Global
-balance = 0.0        # Hält das aktuelle Guthaben des Spielers 
+balance = 100        # Hält das aktuelle Guthaben des Spielers 
 user_id = 0          # Speichert die ID des aktuellen Benutzers 
 random = 0           # Speichert eine zufällige Zahl "das letzte Ergebnis des Roulettrads"
 table_id = 0         # Tisch-ID
@@ -46,7 +46,7 @@ def register_user():     # wird aufgerufen, wenn sich ein Benutzer angemeldet ha
             messagebox.showinfo("", f"Willkommen, {name}, in the best Fairoulette in the world")
             
             # Daten for local
-            balance = 100.0
+            balance = 100
             user_id = r.json()['id']
             
             login_window.destroy()
@@ -54,25 +54,20 @@ def register_user():     # wird aufgerufen, wenn sich ein Benutzer angemeldet ha
         except requests.exceptions.RequestException as e:
             messagebox.showerror("", f"No Internet")
 
+# BETS
 
 # Make a bet with a number          # Spiellogik
 def make_bet_digit(number, feet):   # Ermöglicht es dem Spieler, auf eine spezifische Zahl zu wetten
     global balance, user_id, table_id
-    print(user_id)
     
     type = "number"
     value = str(number)
     
     # if amount not digit
     try:
-        amount = float(feet.get())
-            
-        print(float(feet.get()))
+        amount = int(feet.get())
     except:
         amount = 0.0
-        print('f')
-    print(number)
-    
     
     if amount > balance:    # Überprüft, ob das Wettgeld im erlaubten Rahmen des aktuellen Guthabens liegt.
         messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname + Betrag (Optional)")
@@ -90,6 +85,108 @@ def make_bet_digit(number, feet):   # Ermöglicht es dem Spieler, auf eine spezi
         except requests.exceptions.RequestException as e:
             messagebox.showerror("", f"No Internet")
             pass
+        
+    
+def make_bet_col(option, bet):
+    global balance, user_id, table_id
+    
+    type = "col"
+    
+    # Set value
+    f_row = [3,6,9,12,15,18,21,24,28,31,34,37]
+    s_row = [2,5,8,11,14,17,20,23,27,30,33,36]
+    th_row = [1,4,7,10,13,16,19,22,26,29,32,35]
+    rows = [f_row, s_row, th_row]
+    
+    value = str(rows[option])
+    
+    # Bet
+    try:
+        amount = int(bet.get())
+    except:
+        amount = 0.0
+    
+    if amount > balance: 
+        messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname (Optional)")
+    elif (amount < 0) and (str(user_id) != '777'):
+        messagebox.showwarning("", "are u hacker?")
+    elif amount == 0:
+        messagebox.showwarning("", "ZERO?")
+    else:
+        try:
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id, "type": type, 'value': value, 'amount': amount})
+            r.raise_for_status()
+            balance -= amount           # update balance
+            update_balance_label()
+            update_random_label()
+        except requests.exceptions.RequestException as e:
+            messagebox.showerror("", f"No Internet")
+            pass
+
+def make_bet_dozen(option, bet):
+    global balance, user_id, table_id
+    
+    type = "doz"
+    
+    # Set amount
+    f_row = list(range(1,12))
+    s_row = list(range(13,25))
+    th_row = list(range(26,12))
+    rows = [f_row, s_row, th_row]
+    
+    value = str(rows[option])
+    
+    # Bet
+    try:
+        amount = int(bet.get())
+    except:
+        amount = 0.0
+    if amount > balance: 
+        messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname (Optional)")
+    elif (amount < 0) and (str(user_id) != '777'):
+        messagebox.showwarning("", "are u hacker?")
+    elif amount == 0:
+        messagebox.showwarning("", "ZERO?")
+    else:
+        try:
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id, "type": type, 'value': value, 'amount': amount})
+            r.raise_for_status()
+            balance -= amount           # update balance
+            update_balance_label()
+            update_random_label()
+        except requests.exceptions.RequestException as e:
+            messagebox.showerror("", f"No Internet")
+            pass
+    
+def make_bet_color(value, bet):
+    global balance, user_id, table_id
+    
+    type = "color"
+    
+    # Bet
+    try:
+        amount = int(bet.get())
+    except:
+        amount = 0.0
+    if amount > balance: 
+        messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname (Optional)")
+    elif (amount < 0) and (str(user_id) != '777'):
+        messagebox.showwarning("", "are u hacker?")
+    elif amount == 0:
+        messagebox.showwarning("", "ZERO?")
+    else:
+        try:
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id, "type": type, 'value': value, 'amount': amount})
+            r.raise_for_status()
+            balance -= amount           # update balance
+            update_balance_label()
+            update_random_label()
+        except requests.exceptions.RequestException as e:
+            messagebox.showerror("", f"No Internet")
+            pass    
+
+
+
     
 def open_login_window():    #Erstellt ein Anmeldefenster, in dem der Benutzer seinen Namen eingeben und sich authentifizieren kann. 
     global login_window, entry_name
@@ -182,7 +279,7 @@ def open_game_window():       # Erstellt das Hauptfenster des Spiels, in dem der
     root.rowconfigure(0, weight=1)
 
     
-    # Entrys 
+    # ENTRYS 
     
     Entrys = ttk.Frame(mainframe)
     Entrys.grid(row = 1, column = 0)
@@ -238,7 +335,8 @@ def open_game_window():       # Erstellt das Hauptfenster des Spiels, in dem der
 
 
 
-    # Gameboard
+    # GAMEBOARD
+    
     frame_all_buttons= ttk.Frame(mainframe)
     frame_all_buttons.grid(row = 1, column = 1, sticky=('N'))
     frame_all_buttons.grid_columnconfigure((0,1), weight = 1)
@@ -250,7 +348,7 @@ def open_game_window():       # Erstellt das Hauptfenster des Spiels, in dem der
     
     # Green
     frame_buttons = ttk.Frame(frame_all_buttons)
-    frame_buttons.grid(row = 1, column = 1)
+    frame_buttons.grid(row = 2, column = 1)
     frame_buttons.grid_columnconfigure((0,1), weight = 1)
     frame_buttons.grid_rowconfigure(0, weight = 1)
     
@@ -260,7 +358,7 @@ def open_game_window():       # Erstellt das Hauptfenster des Spiels, in dem der
     # Numbers
     
     frame_buttons = ttk.Frame(frame_all_buttons)
-    frame_buttons.grid(row = 1, column = 2)
+    frame_buttons.grid(row = 2, column = 2)
     frame_buttons.grid_columnconfigure((0,1), weight = 1)
     frame_buttons.grid_rowconfigure(0, weight = 1)
     
@@ -286,30 +384,40 @@ def open_game_window():       # Erstellt das Hauptfenster des Spiels, in dem der
                     
         row_numbers = row_numbers + 1
     
-    # 12 Buttons
+    # Dozen
     
     frame_buttons = ttk.Frame(frame_all_buttons)
-    frame_buttons.grid(row = 4, column = 2)
+    frame_buttons.grid(row = 5, column = 2)
     frame_buttons.grid_columnconfigure((0,1), weight = 1)
     frame_buttons.grid_rowconfigure(0, weight = 1)
     
     
-    Button(frame_buttons, text=f"1 st 12", command=lambda i=0: make_bet_digit(i, feet), width=23, height=2,bg="darkblue", fg="white").grid(column=0, row=0)
-    Button(frame_buttons, text=f"2 nd 12", command=lambda i=0: make_bet_digit(i, feet), width=22, height=2,bg="darkblue", fg="white").grid(column=1, row=0)
-    Button(frame_buttons, text=f"3 rd 12", command=lambda i=0: make_bet_digit(i, feet), width=23, height=2,bg="darkblue", fg="white").grid(column=2, row=0)
+    Button(frame_buttons, text=f"1 st 12", command=lambda i=0: make_bet_dozen(i, feet), width=23, height=2,bg="darkblue", fg="white").grid(column=0, row=0)
+    Button(frame_buttons, text=f"2 nd 12", command=lambda i=1: make_bet_dozen(i, feet), width=22, height=2,bg="darkblue", fg="white").grid(column=1, row=0)
+    Button(frame_buttons, text=f"3 rd 12", command=lambda i=2: make_bet_dozen(i, feet), width=23, height=2,bg="darkblue", fg="white").grid(column=2, row=0)
     
-    # 3 Buttons
+    # Col
     
     frame_buttons = ttk.Frame(frame_all_buttons)
-    frame_buttons.grid(row = 1, column = 14)
+    frame_buttons.grid(row = 2, column = 14)
     frame_buttons.grid_columnconfigure((0,1), weight = 1)
     frame_buttons.grid_rowconfigure(0, weight = 1)
     
     
     Button(frame_buttons, text=f"2 to 1", command=lambda i=0: make_bet_digit(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=0)
-    Button(frame_buttons, text=f"2 to 1", command=lambda i=0: make_bet_digit(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=1)
-    Button(frame_buttons, text=f"2 to 1", command=lambda i=0: make_bet_digit(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=2)
+    Button(frame_buttons, text=f"2 to 1", command=lambda i=1: make_bet_digit(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=1)
+    Button(frame_buttons, text=f"2 to 1", command=lambda i=2: make_bet_digit(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=2)
     
+    # Color bet
+    
+    frame_buttons = ttk.Frame(frame_all_buttons)
+    frame_buttons.grid(row = 1, column = 2)
+    frame_buttons.grid_columnconfigure((0,1), weight = 1)
+    frame_buttons.grid_rowconfigure(0, weight = 1)
+    
+    
+    Button(frame_buttons, text=f"BLACK", command=lambda i=0: make_bet_color(0, "red"), width=35, height=2,bg="black", fg="white").grid(column=0, row=0)
+    Button(frame_buttons, text=f"RED", command=lambda i=1: make_bet_color(1, "black"), width=35, height=2,bg="#8B0000", fg="white").grid(column=1, row=0)
 
     feet_entry.focus()
 

@@ -2,6 +2,8 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 import requests
+
+from PIL import Image, ImageTk
 url = "http://localhost:8000"
 
 # Global
@@ -86,6 +88,7 @@ def make_bet_digit(number, feet):   # Ermöglicht es dem Spieler, auf eine spezi
             update_balance_label()
             update_random_label()
         except requests.exceptions.RequestException as e:
+            messagebox.showerror("", f"No Internet")
             pass
     
 def open_login_window():    #Erstellt ein Anmeldefenster, in dem der Benutzer seinen Namen eingeben und sich authentifizieren kann. 
@@ -173,52 +176,140 @@ def open_game_window():       # Erstellt das Hauptfenster des Spiels, in dem der
     root.title("Fairoulette")
 
     # Window settings
-    mainframe = ttk.Frame(root, padding="10 10 30 30")
-    mainframe.grid(column=0, row=0, sticky=(N, W, E, S))
+    mainframe = ttk.Frame(root, padding="50 50 50 50")
+    mainframe.grid(column=0, row=0)
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
 
-    # Entry a bet
-    feet = StringVar()
+    
+    # Entrys 
+    
+    Entrys = ttk.Frame(mainframe)
+    Entrys.grid(row = 1, column = 0)
+    Entrys.grid_columnconfigure((0,1), weight = 1)
+    Entrys.grid_rowconfigure(0, weight = 1)
+    
     
     Wert_label = ttk.Label(mainframe, text=f"Wert:")
-    Wert_label.grid(column=1, row=1, sticky=(W, E))
+    Wert_label.grid(column=1, row=0, sticky=('NW'))
+    Wert_label.config(font=("Courier", 20))
     
+    feet = StringVar()
     feet_entry = ttk.Entry(mainframe, width=7, textvariable=feet)
-    feet_entry.grid(column=2, row=1, sticky=(W, E))
+    feet_entry.grid(column=1, row=0, sticky=(''))
+    feet_entry.config(font=("Courier", 20))
+    
+    
+    # Images
+               
+    wheel_path = Image.open("../assets/data/fairoulette/wheel.png")
+    wheel = ImageTk.PhotoImage(wheel_path) 
+    
+     
+    # Labels 
+     
+    wheel_label = ttk.Label(Entrys, image=wheel)
+    wheel_label.grid(column=0, row=5)
+    
+    random_label = ttk.Label(Entrys, text=f"{str(random)}")
+    random_label.config(font=("Courier", 64), width=1)
+    random_label.grid(column=0, row=5)
+    
+    
+    empty_label = ttk.Label(Entrys, text=f" ")
+    empty_label.grid(column=0, row=6)
+    empty_label.config(font=("Courier", 36))
 
-    #meters = StringVar()
-    #ttk.Label(mainframe, textvariable=meters).grid(column=2, row=2, sticky=(W, E))
+
+    balance_label = ttk.Label(Entrys, text=f"Balance: {str(balance)}")
+    balance_label.grid(column=0, row=7)
+    balance_label.config(font=("Courier", 20))
+    
+    
+    empty_label = ttk.Label(Entrys, text=f" ")
+    empty_label.grid(column=0, row=8)
+    empty_label.config(font=("Courier", 55))
+    
+    table_label = ttk.Label(Entrys, text=f"Table: {str(table_id)}")
+    table_label.grid(column=0, row=9)
+    table_label.config(font=("Courier", 12))
+
+
+
+
 
     # Gameboard
-    Button(mainframe, text=f"{0}", command=lambda i=0: make_bet_digit(i, feet), width=4, height=8,bg="green", fg="white").grid(column=20, row=11, sticky=(S, E))
+    frame_all_buttons= ttk.Frame(mainframe)
+    frame_all_buttons.grid(row = 1, column = 1, sticky=('N'))
+    frame_all_buttons.grid_columnconfigure((0,1), weight = 1)
+    frame_all_buttons.grid_rowconfigure(0, weight = 1)
+    
+    empty_label = ttk.Label(frame_all_buttons, text=f" ")
+    empty_label.grid(column=0, row=0)
+    empty_label.config(font=("Courier", 40))
+    
+    # Green
+    frame_buttons = ttk.Frame(frame_all_buttons)
+    frame_buttons.grid(row = 1, column = 1)
+    frame_buttons.grid_columnconfigure((0,1), weight = 1)
+    frame_buttons.grid_rowconfigure(0, weight = 1)
+    
+    Button(frame_buttons, text=f"{0}", command=lambda i=0: make_bet_digit(i, feet), width=4, height=7,bg="green", fg="white").grid(column=0, row=0)
+    
+    
+    # Numbers
+    
+    frame_buttons = ttk.Frame(frame_all_buttons)
+    frame_buttons.grid(row = 1, column = 2)
+    frame_buttons.grid_columnconfigure((0,1), weight = 1)
+    frame_buttons.grid_rowconfigure(0, weight = 1)
     
     black = [2,4,6,8,10,11,13,15,17,20,22,24,27,29,30,32,34,36]
-    
     f_row = [3,6,9,12,15,18,21,24,28,31,34,37]
     s_row = [2,5,8,11,14,17,20,23,27,30,33,36]
     th_row = [1,4,7,10,13,16,19,22,26,29,32,35]
+    
     rows = [f_row, s_row, th_row]
     row_numbers = 0
+    column_numbers = 0
+    
     for row in rows:
-        row_numbers = row_numbers + 1
         for i in row:
                 color = is_black(i)
-                Button(mainframe, text=f"{i}", command=lambda i=i: make_bet_digit(i, feet), width=4, height=2,bg=color, fg="white").grid(column=i+row_numbers+20, row=row_numbers+10, sticky=(S, E))
-        
-
-    balance_label = ttk.Label(mainframe, text=f"Balance: {str(balance)}")
-    balance_label.grid(column=20, row=2, sticky=(W, E))
+                if column_numbers < 12:
+                    Button(frame_buttons, text=f"{i}", command=lambda i=i: make_bet_digit(i, feet), width=4, height=2,bg=color, fg="white").grid(column=column_numbers, row=row_numbers)
+                    column_numbers += 1
+                else:
+                    column_numbers = 0
+                    Button(frame_buttons, text=f"{i}", command=lambda i=i: make_bet_digit(i, feet), width=4, height=2,bg=color, fg="white").grid(column=column_numbers, row=row_numbers)
+                    column_numbers += 1
+                    
+        row_numbers = row_numbers + 1
     
-    random_label = ttk.Label(mainframe, text=f"Random: {str(random)}")
-    random_label.grid(column=20, row=1, sticky=(W, E))
+    # 12 Buttons
     
-    table_label = ttk.Label(mainframe, text=f"Table: {str(table_id)}")
-    table_label.grid(column=20, row=3, sticky=(W, E))
+    frame_buttons = ttk.Frame(frame_all_buttons)
+    frame_buttons.grid(row = 4, column = 2)
+    frame_buttons.grid_columnconfigure((0,1), weight = 1)
+    frame_buttons.grid_rowconfigure(0, weight = 1)
     
-
-    #for child in mainframe.winfo_children(): 
-    #   child.grid_configure(padx=5, pady=5)
+    
+    Button(frame_buttons, text=f"1 st 12", command=lambda i=0: make_bet_digit(i, feet), width=23, height=2,bg="darkblue", fg="white").grid(column=0, row=0)
+    Button(frame_buttons, text=f"2 nd 12", command=lambda i=0: make_bet_digit(i, feet), width=22, height=2,bg="darkblue", fg="white").grid(column=1, row=0)
+    Button(frame_buttons, text=f"3 rd 12", command=lambda i=0: make_bet_digit(i, feet), width=23, height=2,bg="darkblue", fg="white").grid(column=2, row=0)
+    
+    # 3 Buttons
+    
+    frame_buttons = ttk.Frame(frame_all_buttons)
+    frame_buttons.grid(row = 1, column = 14)
+    frame_buttons.grid_columnconfigure((0,1), weight = 1)
+    frame_buttons.grid_rowconfigure(0, weight = 1)
+    
+    
+    Button(frame_buttons, text=f"2 to 1", command=lambda i=0: make_bet_digit(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=0)
+    Button(frame_buttons, text=f"2 to 1", command=lambda i=0: make_bet_digit(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=1)
+    Button(frame_buttons, text=f"2 to 1", command=lambda i=0: make_bet_digit(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=2)
+    
 
     feet_entry.focus()
 
@@ -232,7 +323,7 @@ def is_black(i):       #Hilfsfunktion, die bestimmt, ob eine Zahl schwarz ist, b
     else:
         return "#8B0000"
     
-#open_game_window()
-open_login_window()
+open_game_window()
+#open_login_window()
 
 #open_table_window()

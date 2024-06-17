@@ -7,7 +7,7 @@ from PIL import Image, ImageTk
 url = "http://localhost:8000"
 
 # Global
-balance = 100        # Hält das aktuelle Guthaben des Spielers 
+balance = 0          # Hält das aktuelle Guthaben des Spielers 
 user_id = 0          # Speichert die ID des aktuellen Benutzers 
 random = 0           # Speichert eine zufällige Zahl "das letzte Ergebnis des Roulettrads"
 table_id = 0         # Tisch-ID
@@ -35,7 +35,6 @@ def register_user():     # wird aufgerufen, wenn sich ein Benutzer angemeldet ha
         # User exists
         user_id = user_data['id']
         balance = user_data['balance']
-        messagebox.showinfo("", f"{name} bist du bereit zu verlieren (wieder)?")
         login_window.destroy()
         open_table_window()
     else:
@@ -43,7 +42,7 @@ def register_user():     # wird aufgerufen, wenn sich ein Benutzer angemeldet ha
             r = requests.post(f"{url}/users/", json={'name': name})
             r.raise_for_status()
             print(r.json())
-            messagebox.showinfo("", f"Willkommen, {name}, in the best Fairoulette in the world")
+            messagebox.showinfo("", f"Willkommen, {name}, in the best Roulette in the world")
             
             # Daten for local
             balance = 100
@@ -77,7 +76,7 @@ def make_bet_digit(number, feet):   # Ermöglicht es dem Spieler, auf eine spezi
         messagebox.showwarning("", "ZERO?")
     else:
         try:
-            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id, "type": type, 'value': value, 'amount': amount})
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': value, 'amount': amount})
             r.raise_for_status()
             balance -= amount # minus money
             update_balance_label()
@@ -98,7 +97,10 @@ def make_bet_col(option, bet):
     th_row = [1,4,7,10,13,16,19,22,26,29,32,35]
     rows = [f_row, s_row, th_row]
     
-    value = str(rows[option])
+    value = ''
+    
+    for digit in rows[option]:
+        value = str(digit) + ',' + value
     
     # Bet
     try:
@@ -114,7 +116,7 @@ def make_bet_col(option, bet):
         messagebox.showwarning("", "ZERO?")
     else:
         try:
-            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id, "type": type, 'value': value, 'amount': amount})
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': str(value), 'amount': amount})
             r.raise_for_status()
             balance -= amount           # update balance
             update_balance_label()
@@ -131,10 +133,13 @@ def make_bet_dozen(option, bet):
     # Set amount
     f_row = list(range(1,12))
     s_row = list(range(13,25))
-    th_row = list(range(26,12))
+    th_row = list(range(26,37))
     rows = [f_row, s_row, th_row]
     
-    value = str(rows[option])
+    value = ''
+    
+    for digit in rows[option]:
+        value = str(digit) + ',' + value
     
     # Bet
     try:
@@ -149,13 +154,13 @@ def make_bet_dozen(option, bet):
         messagebox.showwarning("", "ZERO?")
     else:
         try:
-            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id, "type": type, 'value': value, 'amount': amount})
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': value, 'amount': amount})
             r.raise_for_status()
             balance -= amount           # update balance
             update_balance_label()
             update_random_label()
         except requests.exceptions.RequestException as e:
-            messagebox.showerror("", f"No Internet")
+            messagebox.showerror("", f"No Internet{e}")
             pass
     
 def make_bet_color(value, bet):
@@ -168,6 +173,7 @@ def make_bet_color(value, bet):
         amount = int(bet.get())
     except:
         amount = 0.0
+        
     if amount > balance: 
         messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname (Optional)")
     elif (amount < 0) and (str(user_id) != '777'):
@@ -176,7 +182,7 @@ def make_bet_color(value, bet):
         messagebox.showwarning("", "ZERO?")
     else:
         try:
-            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id, "type": type, 'value': value, 'amount': amount})
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': value, 'amount': amount})
             r.raise_for_status()
             balance -= amount           # update balance
             update_balance_label()
@@ -191,7 +197,7 @@ def make_bet_color(value, bet):
 def open_login_window():    #Erstellt ein Anmeldefenster, in dem der Benutzer seinen Namen eingeben und sich authentifizieren kann. 
     global login_window, entry_name
     login_window = Tk()
-    login_window.title("Reg")
+    login_window.title("Auth")
 
     label_name = Label(login_window, text="Name:")
     label_name.grid(row=0, column=0, padx=20, pady=5)
@@ -213,7 +219,10 @@ def update_random_label():
         r = requests.get(f"{url}/get_result/{table_id}")
         r.raise_for_status()
         random = r.json()['result']
-        random_label.config(text=f"Random: {str(random)}")
+        if random < 10:
+            random_label.config(text=f"{str(random)}", width=1)
+        else:
+            random_label.config(text=f"{str(random)}", width=2)
             
     except requests.exceptions.RequestException as e:
         messagebox.showerror("", f"{e}")
@@ -222,17 +231,35 @@ def open_table_window():
     global table_windows
     table_windows = Tk()
     table_windows.title("Choose Table")
+
+    # Window settings
+    gameframe = ttk.Frame(table_windows, padding="20 20 20 20")
+    gameframe.grid(column=0, row=0)
+    table_windows.columnconfigure(0, weight=1)
+    table_windows.rowconfigure(0, weight=1)
     
-    #choose_table()
+    #label_table_choose = Label(gameframe, text="Choose Game Table")
+    #label_table_choose.grid(row=0, column=0, sticky=(W,N))
     
+    try:
+        r = requests.get(f"{url}/tables")
+        r.raise_for_status()
+        tables_arr = r.json()['tables']
+        column_index = 0
+        
+        for table in tables_arr:
+            Button(gameframe, text=f"Table {table}", command=lambda table=table: choose_table(table)).grid(row=1, column=column_index)
+            column_index += 1
 
-    label_table = Label(table_windows, text="Tables")
-    label_table.grid(row=0, column=0, padx=20, pady=5)
+    except requests.exceptions.RequestException as e:
+        messagebox.showerror("", f"No Internet")
 
-
-    button_update = Button(table_windows, text="update", command=update_tables)
-    button_update.grid(row=0, columnspan=2, pady=20)
-
+    
+    '''
+    button_update = Button(table_windows, text="Update", command=update_tables)
+    button_update.grid(row=0, column=1)
+    '''
+    
     table_windows.mainloop()
 
 def choose_table(table):
@@ -250,12 +277,8 @@ def update_tables():
         r.raise_for_status()
         tables_arr = r.json()['tables']
         for table in tables_arr:
-            label_table_choose = Label(table_windows, text="          ")
-            label_table_choose.grid(row=4, column=table, padx=20, pady=5)
-            
-            Button(table_windows, text=f"Table {table}", command=lambda table=table: choose_table(table)).grid(row=6, columnspan=table, sticky=(S, E))
-         
-            
+            Button(table_windows, text=f"Table {table}", command=lambda table=table: choose_table(table)).grid(row=2, column=table+5, sticky=(S, E))
+
         
         
         #login_window.destroy()
@@ -404,9 +427,9 @@ def open_game_window():       # Erstellt das Hauptfenster des Spiels, in dem der
     frame_buttons.grid_rowconfigure(0, weight = 1)
     
     
-    Button(frame_buttons, text=f"2 to 1", command=lambda i=0: make_bet_digit(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=0)
-    Button(frame_buttons, text=f"2 to 1", command=lambda i=1: make_bet_digit(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=1)
-    Button(frame_buttons, text=f"2 to 1", command=lambda i=2: make_bet_digit(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=2)
+    Button(frame_buttons, text=f"2 to 1", command=lambda i=0: make_bet_col(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=0)
+    Button(frame_buttons, text=f"2 to 1", command=lambda i=1: make_bet_col(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=1)
+    Button(frame_buttons, text=f"2 to 1", command=lambda i=2: make_bet_col(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=2)
     
     # Color bet
     
@@ -416,8 +439,8 @@ def open_game_window():       # Erstellt das Hauptfenster des Spiels, in dem der
     frame_buttons.grid_rowconfigure(0, weight = 1)
     
     
-    Button(frame_buttons, text=f"BLACK", command=lambda i=0: make_bet_color(0, "red"), width=35, height=2,bg="black", fg="white").grid(column=0, row=0)
-    Button(frame_buttons, text=f"RED", command=lambda i=1: make_bet_color(1, "black"), width=35, height=2,bg="#8B0000", fg="white").grid(column=1, row=0)
+    Button(frame_buttons, text=f"BLACK", command=lambda i=0: make_bet_color("red", feet), width=35, height=2,bg="black", fg="white").grid(column=0, row=0)
+    Button(frame_buttons, text=f"RED", command=lambda i=1: make_bet_color("black", feet), width=35, height=2,bg="#8B0000", fg="white").grid(column=1, row=0)
 
     feet_entry.focus()
 
@@ -431,7 +454,7 @@ def is_black(i):       #Hilfsfunktion, die bestimmt, ob eine Zahl schwarz ist, b
     else:
         return "#8B0000"
     
-open_game_window()
-#open_login_window()
+#open_game_window()
+open_login_window()
 
 #open_table_window()

@@ -15,6 +15,7 @@ import time
 import threading
 
 tables: list[Table] = []
+results: list[int] = [0,0,0] # todo: auto size etc
 
 app = FastAPI(
     title="Fairroulette"
@@ -47,9 +48,27 @@ def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
 
     db_bet = crud.create_bet(db=db, user_id=bet.user_id, table_id=bet.table_id, type=bet.type, value=bet.value, amount=bet.amount)
     new_bet = Bet(bet.user_id, db_bet.id)
+    
+    print(bet)
+    # bet's types
     if bet.type == 'number':
         new_bet.add_number_bet(int(bet.value), bet.amount)
-    print(bet.table_id)
+    elif bet.type == 'col':
+        # wir bekommen ein Array in str
+        for digit in range(len(bet.value.split(",")) - 1):
+            value = bet.value.split(",")[digit]
+            new_bet.add_dozen_bet(int(value), bet.amount)
+    elif bet.type == 'doz':
+        # wir bekommen ein Array in str
+        for digit in range(len(bet.value.split(",")) - 1):
+            value = bet.value.split(",")[digit]
+            new_bet.add_dozen_bet(int(value), bet.amount)
+    elif bet.type == 'color':
+        if 'red' == bet.value:
+            new_bet.add_red_bet(bet.amount)
+        else:
+            new_bet.add_black_bet(bet.amount)
+        
     tables[bet.table_id].add_or_update_bet_for_participant(bet.user_id, new_bet)
     
     user = crud.get_user_id(db, bet.user_id)
@@ -76,10 +95,10 @@ def get_result(user_id: int, db: Session = Depends(get_db)):
 
 
 #
-@app.get("/get_result")
-async def post_random():
-    print(f'{result_random}')
-    return {'result': result_random}
+@app.get("/get_result/{table_id}")
+async def post_random(table_id: int):
+    print(f'{results[table_id - 1]}')
+    return {'result': results[table_id - 1]}
 
 @app.get("/tables", tags=["Table"])
 async def get_tables(db: Session = Depends(get_db)):
@@ -100,11 +119,12 @@ async def redirect():
 
 
 async def run_roulette_game():
-    global result_random
+    global result_random, results
     while True:
         await asyncio.sleep(5)
         for table in tables:
             result_random = table.calculate_result()
+            results[table.get_table_id() - 1] = result_random
             print(f"Table: {table.get_table_id()} - Result: {result_random}")
 
 

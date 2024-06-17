@@ -22,13 +22,13 @@ class Bet {
    public:
     Bet(int user_id, int bet_id);
     int calculate_result(int number);
-    void add_number_bet(int number, float worth);
-    void add_red_bet(float worth);
-    void add_black_bet(float worth);
-    void add_even_bet(float worth);
-    void add_odd_bet(float worth);
-    void add_col_bet(int col, float worth);
-    void add_dozen_bet(int dozen, float worth);
+    void add_number_bet(int number, int worth);
+    void add_red_bet(int worth);
+    void add_black_bet(int worth);
+    void add_even_bet(int worth);
+    void add_odd_bet(int worth);
+    void add_col_bet(int col, int worth);
+    void add_dozen_bet(int dozen, int worth);
 
     std::array<int, 37> get_number_bets() {
         return number_bets;

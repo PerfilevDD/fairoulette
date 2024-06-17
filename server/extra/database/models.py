@@ -19,7 +19,7 @@ class Bet(Base):
 
     type = Column(String, nullable=False)
     value = Column(String, nullable=False)
-    amount = Column(Float, nullable=False)
+    amount = Column(Integer, nullable=False)
 
 class RouletteTable(Base):
     __tablename__ = "roulette_table"

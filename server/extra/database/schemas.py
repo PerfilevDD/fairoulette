@@ -8,7 +8,7 @@ class BetBase(BaseModel):
     user_id: int
     type: str
     value: str
-    amount: float
+    amount: int
 
 
 class BetCreate(BetBase):

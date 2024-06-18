@@ -8,30 +8,30 @@ namespace Fairoulette {
     
     Bet::Bet(int user_id, int bet_id) : user_id(user_id), bet_id(bet_id) {}
 
-    void Bet::add_black_bet(float worth) {  // Fügt einen Betrag zur schwarzen Wette 
+    void Bet::add_black_bet(int worth) {  // Fügt einen Betrag zur schwarzen Wette
         this->outside_bets.black += worth;
     }
 
-    void Bet::add_red_bet(float worth) {    // Fügt einen Betrag zur roten schwarzen Wette
+    void Bet::add_red_bet(int worth) {    // Fügt einen Betrag zur roten schwarzen Wette
         this->outside_bets.red += worth;
     }
 
-    void Bet::add_even_bet(float worth) {   // Fügt einen Betrag zur geraden Wette 
+    void Bet::add_even_bet(int worth) {   // Fügt einen Betrag zur geraden Wette 
         this->outside_bets.even += worth;
     }
 
-    void Bet::add_odd_bet(float worth) {    // Fügt einen betrag zur ungeraden Wette 
+    void Bet::add_odd_bet(int worth) {    // Fügt einen betrag zur ungeraden Wette 
         this->outside_bets.odd += worth;
     }
 
-    void Bet::add_number_bet(int number, float worth) { // Fügt einen Betrag zu einer spezifischen null und 36
+    void Bet::add_number_bet(int number, int worth) { // Fügt einen Betrag zu einer spezifischen null und 36
         if (!(number >= 0 && number <= 36)) {
             // TODO: Throw error for not in bounds
         }
         number_bets[number] += worth;
     }
 
-    void Bet::add_col_bet(int col, float worth) {   // Zeilenweise eine Wette setzen
+    void Bet::add_col_bet(int col, int worth) {   // Zeilenweise eine Wette setzen
         switch (col) {
             case 1:
                 outside_bets.col1 += worth;
@@ -48,7 +48,7 @@ namespace Fairoulette {
         }
     }
 
-    void Bet::add_dozen_bet(int dozen, float worth) {
+    void Bet::add_dozen_bet(int dozen, int worth) {
         switch (dozen) {
             case 1:
                 outside_bets.dozen1 += worth;

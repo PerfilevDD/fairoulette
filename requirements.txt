@@ -4,3 +4,4 @@ sqlalchemy
 pydantic
 aiofiles
 pybind11
+uvicorn

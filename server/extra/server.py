@@ -1,3 +1,6 @@
+import argparse, uvicorn
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Depends, HTTPException
 from fairoulette import Randomizer, Bet, Table  # type: ignore
 
@@ -127,9 +130,18 @@ async def run_roulette_game():
             results[table.get_table_id() - 1] = result_random
             print(f"Table: {table.get_table_id()} - Result: {result_random}")
 
-
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     for table in crud.get_tables(next(get_db())):
         tables.append(Table(table.id))
     asyncio.create_task(run_roulette_game())
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-rd', '--round_duration', default=30)
+    parser.add_argument('-p', '--port', type=int, default=8000, help="The port on which the api will be accessible.")
+    parser.add_argument('-ho', '--host', default="localhost", help="The host on which the api will be accessible.")
+    args = parser.parse_args()
+
+    round_duration = args.round_duration
+    uvicorn.run(app, host=args.host, port=args.port)

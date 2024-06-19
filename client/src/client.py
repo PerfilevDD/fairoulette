@@ -7,10 +7,10 @@ from PIL import Image, ImageTk
 url = "http://localhost:8000"
 
 # Global
-balance = 0          # Hält das aktuelle Guthaben des Spielers 
-user_id = 0          # Speichert die ID des aktuellen Benutzers 
+balance = 100          # Hält das aktuelle Guthaben des Spielers 
+user_id = 777          # Speichert die ID des aktuellen Benutzers 
 random = 0           # Speichert eine zufällige Zahl "das letzte Ergebnis des Roulettrads"
-table_id = 0         # Tisch-ID
+table_id = 2         # Tisch-ID
 
 def check_user(name):
     try:
@@ -86,21 +86,8 @@ def make_bet_digit(number, feet):   # Ermöglicht es dem Spieler, auf eine spezi
             pass
         
     
-def make_bet_col(option, bet):
+def make_bet_col(value, bet):
     global balance, user_id, table_id
-    
-    type = "col"
-    
-    # Set value
-    f_row = [3,6,9,12,15,18,21,24,28,31,34,37]
-    s_row = [2,5,8,11,14,17,20,23,27,30,33,36]
-    th_row = [1,4,7,10,13,16,19,22,26,29,32,35]
-    rows = [f_row, s_row, th_row]
-    
-    value = ''
-    
-    for digit in rows[option]:
-        value = str(digit) + ',' + value
     
     # Bet
     try:
@@ -116,7 +103,7 @@ def make_bet_col(option, bet):
         messagebox.showwarning("", "ZERO?")
     else:
         try:
-            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': str(value), 'amount': amount})
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': value, 'amount': amount})
             r.raise_for_status()
             balance -= amount           # update balance
             update_balance_label()
@@ -125,21 +112,10 @@ def make_bet_col(option, bet):
             messagebox.showerror("", f"No Internet")
             pass
 
-def make_bet_dozen(option, bet):
+def make_bet_dozen(value, bet):
     global balance, user_id, table_id
     
     type = "doz"
-    
-    # Set amount
-    f_row = list(range(1,12))
-    s_row = list(range(13,25))
-    th_row = list(range(26,37))
-    rows = [f_row, s_row, th_row]
-    
-    value = ''
-    
-    for digit in rows[option]:
-        value = str(digit) + ',' + value
     
     # Bet
     try:

@@ -10,18 +10,22 @@ namespace Fairoulette {
 
     void Bet::add_black_bet(int worth) {  // Fügt einen Betrag zur schwarzen Wette
         this->outside_bets.black += worth;
+        bet_worth += worth;
     }
 
     void Bet::add_red_bet(int worth) {    // Fügt einen Betrag zur roten schwarzen Wette
         this->outside_bets.red += worth;
+        bet_worth += worth;
     }
 
     void Bet::add_even_bet(int worth) {   // Fügt einen Betrag zur geraden Wette 
         this->outside_bets.even += worth;
+        bet_worth += worth;
     }
 
     void Bet::add_odd_bet(int worth) {    // Fügt einen betrag zur ungeraden Wette 
         this->outside_bets.odd += worth;
+        bet_worth += worth;
     }
 
     void Bet::add_number_bet(int number, int worth) { // Fügt einen Betrag zu einer spezifischen null und 36
@@ -29,18 +33,22 @@ namespace Fairoulette {
             // TODO: Throw error for not in bounds
         }
         number_bets[number] += worth;
+        bet_worth += worth;
     }
 
     void Bet::add_col_bet(int col, int worth) {   // Zeilenweise eine Wette setzen
         switch (col) {
-            case 1:
+            case 0:
                 outside_bets.col1 += worth;
+                bet_worth += worth;
+                break;
+            case 1:
+                outside_bets.col2 += worth;
+                bet_worth += worth;
                 break;
             case 2:
-                outside_bets.col2 += worth;
-                break;
-            case 3:
                 outside_bets.col3 += worth;
+                bet_worth += worth;
                 break;
             default:
                 // Todo: Throw error
@@ -50,14 +58,17 @@ namespace Fairoulette {
 
     void Bet::add_dozen_bet(int dozen, int worth) {
         switch (dozen) {
-            case 1:
+            case 0:
                 outside_bets.dozen1 += worth;
+                bet_worth += worth;
+                break;
+            case 1:
+                outside_bets.dozen2 += worth;
+                bet_worth += worth;
                 break;
             case 2:
-                outside_bets.dozen2 += worth;
-                break;
-            case 3:
                 outside_bets.dozen3 += worth;
+                bet_worth += worth;
                 break;
             default:
                 // Todo: Throw error

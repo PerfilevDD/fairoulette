@@ -42,10 +42,15 @@ class Bet {
         return bet_id;
     }
 
+    int get_bet_worth() {
+        return bet_worth;
+    }
+
    private:
     std::array<int, 37> number_bets = {};
     struct OutsideBets outside_bets = {};
     int user_id;
     int bet_id;
+    int bet_worth = 0;
 };
 }  // namespace Fairoulette

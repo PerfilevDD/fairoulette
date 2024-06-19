@@ -33,7 +33,8 @@ async def run_roulette_game(db: Session):
                 placed_sum = bet.get_bet_worth()
                 print("Bet", bet.get_bet_id(), "for user", bet.get_user_id() ,"placed", placed_sum, "and received", received)
                 if received > 0:
-                    crud.add_balance_to_user(db, bet.get_user_id(), received)
+                    print("Updating balance")
+                    crud.process_bet(db, bet.get_bet_id(), bet.get_user_id(), table.get_table_id(), received)
 
 
 

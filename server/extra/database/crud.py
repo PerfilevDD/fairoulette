@@ -42,17 +42,18 @@ def create_table(db: Session):
     db.refresh(db_table)
     return db_table
 
-def process_bet(db: Session, user_id, table_id, earnings: int):
+def process_bet(db: Session, bet_id, user_id, table_id, earnings: int):
     try:
-        bet = db.query(models.Bet).filter(and_(models.Bet.user_id == user_id, models.Bet.table_id == table_id)).get()
-        user = db.query(models.User).filter(models.User.id == user_id).get()
+        print(user_id)
+        user = db.query(models.User).get(user_id)
+        
     except Exception as e:
         return
 
     db_balance_history = models.BalanceUpdate(
         table_id=table_id,
         user_id=user_id,
-        bet_id=bet.id,
+        bet_id=bet_id,
         bet_earnings=earnings,
     )
 
@@ -66,6 +67,8 @@ def get_tables(db: Session):
 
     for table in tables:
         yield table
+
+
 
 
 

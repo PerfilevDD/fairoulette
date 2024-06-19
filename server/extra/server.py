@@ -18,10 +18,39 @@ import time
 import threading
 
 tables: list[Table] = []
-results: list[int] = [0,0,0] # todo: auto size etc
+results: list[int] = []
+round_duration: int = 5
+
+async def run_roulette_game(db: Session):
+    while True:
+        await asyncio.sleep(round_duration)
+        for table in tables:
+            result_random = table.calculate_result()
+            results[table.get_table_id() - 1] = result_random
+            print(f"Table: {table.get_table_id()} - Result: {result_random}")
+            for bet in table.get_and_clear_bets():
+                received = bet.calculate_result(result_random)
+                placed_sum = bet.get_bet_worth()
+                print("Bet", bet.get_bet_id(), "for user", bet.get_user_id() ,"placed", placed_sum, "and received", received)
+                if received > 0:
+                    print("Updating balance")
+                    crud.process_bet(db, bet.get_bet_id(), bet.get_user_id(), table.get_table_id(), received)
+
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    db = next(get_db())
+    for table in crud.get_tables(db):
+        tables.append(Table(table.id))
+        results.append(-1)
+    asyncio.create_task(run_roulette_game(db))
+    yield
+
 
 app = FastAPI(
-    title="Fairroulette"
+    title="Fairroulette",
+    lifespan=lifespan
 )
 
 # Database
@@ -51,21 +80,25 @@ def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
 
     db_bet = crud.create_bet(db=db, user_id=bet.user_id, table_id=bet.table_id, type=bet.type, value=bet.value, amount=bet.amount)
     new_bet = Bet(bet.user_id, db_bet.id)
-    
-    print(bet)
-    # bet's types
+    user = crud.get_user_id(db, bet.user_id)
+
+    if user.balance < bet.amount:
+        raise HTTPException(
+            status=500,
+            details="Not enough balance to do this."
+        )
+
+    user.balance -= bet.amount
+
+
+
+# bet's types
     if bet.type == 'number':
         new_bet.add_number_bet(int(bet.value), bet.amount)
     elif bet.type == 'col':
-        # wir bekommen ein Array in str
-        for digit in range(len(bet.value.split(",")) - 1):
-            value = bet.value.split(",")[digit]
-            new_bet.add_dozen_bet(int(value), bet.amount)
+        new_bet.add_dozen_bet(int(bet.value), bet.amount)
     elif bet.type == 'doz':
-        # wir bekommen ein Array in str
-        for digit in range(len(bet.value.split(",")) - 1):
-            value = bet.value.split(",")[digit]
-            new_bet.add_dozen_bet(int(value), bet.amount)
+        new_bet.add_dozen_bet(int(bet.value), bet.amount)
     elif bet.type == 'color':
         if 'red' == bet.value:
             new_bet.add_red_bet(bet.amount)
@@ -74,8 +107,6 @@ def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
         
     tables[bet.table_id].add_or_update_bet_for_participant(bet.user_id, new_bet)
     
-    user = crud.get_user_id(db, bet.user_id)
-    user.balance -= bet.amount
 
     return crud.create_bet(db=db, user_id=bet.user_id, table_id=bet.table_id, type=bet.type, value=bet.value, amount=bet.amount)
 
@@ -100,7 +131,6 @@ def get_result(user_id: int, db: Session = Depends(get_db)):
 #
 @app.get("/get_result/{table_id}")
 async def post_random(table_id: int):
-    print(f'{results[table_id - 1]}')
     return {'result': results[table_id - 1]}
 
 @app.get("/tables", tags=["Table"])
@@ -121,27 +151,15 @@ async def redirect():
     return RedirectResponse(url="/docs")
 
 
-async def run_roulette_game():
-    global result_random, results
-    while True:
-        await asyncio.sleep(5)
-        for table in tables:
-            result_random = table.calculate_result()
-            results[table.get_table_id() - 1] = result_random
-            print(f"Table: {table.get_table_id()} - Result: {result_random}")
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    for table in crud.get_tables(next(get_db())):
-        tables.append(Table(table.id))
-    asyncio.create_task(run_roulette_game())
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-rd', '--round_duration', default=30)
+    parser.add_argument('-rd', '--round_duration', type=int,  default=30)
     parser.add_argument('-p', '--port', type=int, default=8000, help="The port on which the api will be accessible.")
     parser.add_argument('-ho', '--host', default="localhost", help="The host on which the api will be accessible.")
     args = parser.parse_args()
 
     round_duration = args.round_duration
+    print(f"Round duration is set at {round_duration}")
+
     uvicorn.run(app, host=args.host, port=args.port)

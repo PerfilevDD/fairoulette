@@ -68,6 +68,17 @@ def get_tables(db: Session):
     for table in tables:
         yield table
 
+def add_balance_to_user(db: Session, user_id: int, balance_change: int):
+    try:
+        user = db.query(models.User).filter(models.User.id == user_id).get()
+    except Exception as e:
+        # TODO: Add Exception when bet is not foud
+        return
+
+    user.balance += balance_change
+    db.commit()
+
+
 
 
 

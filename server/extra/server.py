@@ -21,7 +21,7 @@ tables: list[Table] = []
 results: list[int] = []
 round_duration: int = 5
 
-async def run_roulette_game():
+async def run_roulette_game(db: Session):
     while True:
         await asyncio.sleep(round_duration)
         for table in tables:
@@ -32,15 +32,18 @@ async def run_roulette_game():
                 received = bet.calculate_result(result_random)
                 placed_sum = bet.get_bet_worth()
                 print("Bet", bet.get_bet_id(), "for user", bet.get_user_id() ,"placed", placed_sum, "and received", received)
+                if received > 0:
+                    crud.add_balance_to_user(db, bet.get_user_id(), received)
 
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    for table in crud.get_tables(next(get_db())):
+    db = next(get_db())
+    for table in crud.get_tables(db):
         tables.append(Table(table.id))
         results.append(-1)
-    asyncio.create_task(run_roulette_game())
+    asyncio.create_task(run_roulette_game(db))
     yield
 
 
@@ -77,7 +80,6 @@ def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
     db_bet = crud.create_bet(db=db, user_id=bet.user_id, table_id=bet.table_id, type=bet.type, value=bet.value, amount=bet.amount)
     new_bet = Bet(bet.user_id, db_bet.id)
     
-    print(bet)
     # bet's types
     if bet.type == 'number':
         new_bet.add_number_bet(int(bet.value), bet.amount)
@@ -125,7 +127,6 @@ def get_result(user_id: int, db: Session = Depends(get_db)):
 #
 @app.get("/get_result/{table_id}")
 async def post_random(table_id: int):
-    print(f'{results[table_id - 1]}')
     return {'result': results[table_id - 1]}
 
 @app.get("/tables", tags=["Table"])

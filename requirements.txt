@@ -6,3 +6,5 @@ aiofiles
 pybind11
 uvicorn
 pysqlite3
+requests
+pillow

@@ -29,9 +29,6 @@ void Table::add_participant(int pid) {      // Neuer Nutzer kommt am Tisch
 }
 
     pybind11::list Table::get_and_clear_bets() {
-        Bet new_bet = Bet(1, 1);
-        new_bet.add_number_bet(1, 10);
-        bets.push_back(new_bet);
         pybind11::list tmp_list = pybind11::cast(bets);
         bets.clear();
         return tmp_list;

@@ -11,10 +11,13 @@ from PIL import Image, ImageTk
 url = "http://localhost:8000"
 
 # Global
-balance = 100          # Hält das aktuelle Guthaben des Spielers 
-user_id = 1          # Speichert die ID des aktuellen Benutzers 
+balance = 0          # Hält das aktuelle Guthaben des Spielers 
+user_id = 0          # Speichert die ID des aktuellen Benutzers 
 random = 0           # Speichert eine zufällige Zahl "das letzte Ergebnis des Roulettrads"
-table_id = 1         # Tisch-ID
+table_id = 0         # Tisch-ID
+
+
+delay_time = 5       # In Second
 
 
 
@@ -334,16 +337,15 @@ async def listen_for_updates():
                 win = data['win']
                 
                 if 0 == win:
-                    print('verloren')
-                else:
-                    print('gewonnen')
+                    result_func(0)
+                elif 1 == win:
+                    result_func(1)
                 
                 update_random_label(int(result))
                 update_balance(server_update)
                 
             except websockets.ConnectionClosed:
                 break
-
 
 
 def start_websocket():
@@ -354,23 +356,63 @@ def start_websocket():
     loop = asyncio.new_event_loop()
     t = threading.Thread(target=run_loop, args=(loop,))
     t.start()
+
+
+    
+def update_gif(label, frames, ind):
+    frame = frames[ind]
+    ind += 1
+    if ind == len(frames):
+        ind = 0
+    label.configure(image=frame)
+    root.after(100, update_gif, label, frames, ind)
+    
+    
+def clear_label(label):
+    label.grid_forget()   
+    
+def result_func(res):
+    
+    gif_label = ttk.Label(frame_all_buttons)
+    gif_label.grid(column=2, row=10)
+    
+    if res:
+        gif_path = "../assets/data/fairoulette/win.gif"
+        gif_image = Image.open(gif_path)
+        frames = []
+        try:
+            while True:
+                resized_frame = gif_image.copy().resize((600, 380)) 
+                frames.append(ImageTk.PhotoImage(resized_frame))
+                gif_image.seek(gif_image.tell() + 1) 
+        except EOFError:
+            pass
+        update_gif(gif_label, frames, 0)
+    else:
+        loss_im = Image.open("../assets/data/fairoulette/loss.jpg").resize((600, 380))
+        loss = ImageTk.PhotoImage(loss_im)
+        gif_label.configure(image=loss)
+        gif_label.image = loss
+    root.after(delay_time * 1000, clear_label, gif_label)
+    
+        
+    
     
     
     
 def open_game_window():
-    global root, balance_label, random, random_label, black
+    global root, balance_label, random, random_label, black, frame_all_buttons, loss, gif_label
     
     # Main window
     root = Tk()
     root.title("Fairoulette")
 
     # Window settings
-    mainframe = ttk.Frame(root, padding="50 50 50 50")
+    mainframe = ttk.Frame(root, padding="70 70 70 70")
     mainframe.grid(column=0, row=0)
     root.columnconfigure(0, weight=1)
     root.rowconfigure(0, weight=1)
 
-    
     # ENTRYS 
     
     Entrys = ttk.Frame(mainframe)
@@ -393,6 +435,8 @@ def open_game_window():
                
     wheel_path = Image.open("../assets/data/fairoulette/wheel.png")
     wheel = ImageTk.PhotoImage(wheel_path) 
+    loss_im = Image.open("../assets/data/fairoulette/wheel.png")
+    loss = ImageTk.PhotoImage(loss_im) 
     
      
     # Labels 
@@ -422,6 +466,14 @@ def open_game_window():
     table_label = ttk.Label(Entrys, text=f"Table: {str(table_id)}")
     table_label.grid(column=0, row=9)
     table_label.config(font=("Courier", 12))
+    
+    empty_label = ttk.Label(Entrys, text=f"   ")
+    empty_label.grid(column=0, row=10)
+    empty_label.config(font=("Courier", 86))
+    
+    empty_label = ttk.Label(Entrys, text=f"   ")
+    empty_label.grid(column=0, row=11)
+    empty_label.config(font=("Courier", 36))
 
 
 
@@ -521,8 +573,12 @@ def open_game_window():
     frame_buttons.grid_rowconfigure(0, weight = 1)
     
     
-    Button(frame_buttons, text=f"BLACK", command=lambda i=0: make_bet_color("red", feet), width=35, height=2,bg="black", fg="white").grid(column=0, row=0)
-    Button(frame_buttons, text=f"RED", command=lambda i=1: make_bet_color("black", feet), width=35, height=2,bg="#8B0000", fg="white").grid(column=1, row=0)
+    Button(frame_buttons, text=f"BLACK", command=lambda i=0: make_bet_color("black", feet), width=35, height=2,bg="black", fg="white").grid(column=0, row=0)
+    Button(frame_buttons, text=f"RED", command=lambda i=1: make_bet_color("red", feet), width=35, height=2,bg="#8B0000", fg="white").grid(column=1, row=0)
+    
+    
+    # Image
+    
 
     feet_entry.focus()
     

@@ -32,7 +32,7 @@ async def run_roulette_game(db: Session):
             results[table.get_table_id() - 1] = result_random
             print(f"Table: {table.get_table_id()} - Result: {result_random}")
             balance_to_client = 0
-            win_client = 0
+            win_client = 2
             
             # Bets
             for bet in table.get_and_clear_bets():

@@ -1,7 +1,7 @@
 import argparse, uvicorn
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, WebSocket
 from fairoulette import Randomizer, Bet, Table  # type: ignore
 
 from sqlalchemy.orm import Session
@@ -16,10 +16,13 @@ import database.schemas as schemas
 import asyncio
 import time
 import threading
+import json
 
 tables: list[Table] = []
 results: list[int] = []
 round_duration: int = 5
+
+clients = []
 
 async def run_roulette_game(db: Session):
     while True:
@@ -28,13 +31,30 @@ async def run_roulette_game(db: Session):
             result_random = table.calculate_result()
             results[table.get_table_id() - 1] = result_random
             print(f"Table: {table.get_table_id()} - Result: {result_random}")
+            balance_to_client = 0
+            win_client = 0
+            
+            # Bets
             for bet in table.get_and_clear_bets():
                 received = bet.calculate_result(result_random)
                 placed_sum = bet.get_bet_worth()
-                print("Bet", bet.get_bet_id(), "for user", bet.get_user_id() ,"placed", placed_sum, "and received", received)
+                print("Bet", bet.get_bet_id(), "for user ID ", bet.get_user_id() ,"placed", placed_sum, "and received", received)
                 if received > 0:
                     print("Updating balance")
                     crud.process_bet(db, bet.get_bet_id(), bet.get_user_id(), table.get_table_id(), received)
+                    balance_to_client = received
+                    win_client = 1
+                else:
+                    win_client = 0
+                    
+                    
+            # Websocket
+            data = {"result": result_random, "balance": balance_to_client, "win": win_client}
+            for client in clients:
+                try:
+                    await client.send_text(json.dumps(data))
+                except Exception as e:
+                    clients.remove(client)
 
 
 
@@ -54,7 +74,6 @@ app = FastAPI(
 )
 
 # Database
-# https://fastapi.tiangolo.com/tutorial/sql-databases/#create-data DONT DELETE, sonst macht ihr alles selbst noch mal!!!!111!
 
 models.Base.metadata.create_all(bind=database.db)
 
@@ -67,6 +86,16 @@ def get_db():
     finally:
         db.close()
 
+# Websocket to send a data on client 
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    clients.append(websocket)
+    try:
+        while True:
+            await websocket.receive_text()
+    except Exception as e:
+        clients.remove(websocket)
 
 # create new user
 @app.post("/users", response_model=schemas.User, tags=["User"])
@@ -93,13 +122,19 @@ def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
 
 
 # bet's types
-    if bet.type == 'number':
+    if 'number' == bet.type:
         new_bet.add_number_bet(int(bet.value), bet.amount)
-    elif bet.type == 'col':
+    elif 'col' == bet.type:
         new_bet.add_dozen_bet(int(bet.value), bet.amount)
-    elif bet.type == 'doz':
+    elif 'doz' == bet.type:
+        print('ff')
         new_bet.add_dozen_bet(int(bet.value), bet.amount)
-    elif bet.type == 'color':
+    elif 'parity' == bet.type:
+        if '0' == bet.value:
+            new_bet.add_even_bet(bet.amount)
+        else:
+            new_bet.add_odd_bet(bet.amount)
+    elif 'color' == bet.type:
         if 'red' == bet.value:
             new_bet.add_red_bet(bet.amount)
         else:

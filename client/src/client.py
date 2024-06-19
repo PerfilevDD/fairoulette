@@ -2,15 +2,43 @@ from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
 import requests
+import asyncio
+import websockets
+import threading
+import json
 
 from PIL import Image, ImageTk
 url = "http://localhost:8000"
 
 # Global
-balance = 0          # Hält das aktuelle Guthaben des Spielers 
-user_id = 0          # Speichert die ID des aktuellen Benutzers 
+balance = 100          # Hält das aktuelle Guthaben des Spielers 
+user_id = 1          # Speichert die ID des aktuellen Benutzers 
 random = 0           # Speichert eine zufällige Zahl "das letzte Ergebnis des Roulettrads"
-table_id = 0         # Tisch-ID
+table_id = 1         # Tisch-ID
+
+
+
+
+
+# LOGIN ------------------------------
+
+def open_login_window():    #Erstellt ein Anmeldefenster, in dem der Benutzer seinen Namen eingeben und sich authentifizieren kann. 
+    global login_window, entry_name
+    login_window = Tk()
+    login_window.title("Auth")
+
+    label_name = Label(login_window, text="Name:")
+    label_name.grid(row=0, column=0, padx=20, pady=5)
+
+    entry_name = Entry(login_window)
+    entry_name.grid(row=0, column=1, padx=20, pady=5)
+
+    button_register = Button(login_window, text="Auth", command=register_user)
+    button_register.grid(row=1, columnspan=2, pady=20)
+
+    login_window.mainloop()
+
+
 
 def check_user(name):
     try:
@@ -19,6 +47,7 @@ def check_user(name):
         return r.json()
     except requests.exceptions.RequestException:
         return None     # Bei einem Fehler wird "None" zurückgegeben
+
 
 
 def register_user():     # wird aufgerufen, wenn sich ein Benutzer angemeldet hat bzw. anmeldet
@@ -53,156 +82,9 @@ def register_user():     # wird aufgerufen, wenn sich ein Benutzer angemeldet ha
         except requests.exceptions.RequestException as e:
             messagebox.showerror("", f"No Internet")
 
-# BETS
 
-# Make a bet with a number          # Spiellogik
-def make_bet_digit(number, feet):   # Ermöglicht es dem Spieler, auf eine spezifische Zahl zu wetten
-    global balance, user_id, table_id
-    
-    type = "number"
-    value = str(number)
-    
-    # if amount not digit
-    try:
-        amount = int(feet.get())
-    except:
-        amount = 0.0
-    
-    if amount > balance:    # Überprüft, ob das Wettgeld im erlaubten Rahmen des aktuellen Guthabens liegt.
-        messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname + Betrag (Optional)")
-    elif (amount < 0) and (str(user_id) != '777'):
-        messagebox.showwarning("", "are u hacker?")
-    elif amount == 0:
-        messagebox.showwarning("", "ZERO?")
-    else:
-        try:
-            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': value, 'amount': amount})
-            r.raise_for_status()
-            balance -= amount # minus money
-            update_balance_label()
-            update_random_label()
-        except requests.exceptions.RequestException as e:
-            messagebox.showerror("", f"No Internet")
-            pass
-        
-    
-def make_bet_col(value, bet):
-    global balance, user_id, table_id
-    
-    # Bet
-    try:
-        amount = int(bet.get())
-    except:
-        amount = 0.0
-    
-    if amount > balance: 
-        messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname (Optional)")
-    elif (amount < 0) and (str(user_id) != '777'):
-        messagebox.showwarning("", "are u hacker?")
-    elif amount == 0:
-        messagebox.showwarning("", "ZERO?")
-    else:
-        try:
-            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': value, 'amount': amount})
-            r.raise_for_status()
-            balance -= amount           # update balance
-            update_balance_label()
-            update_random_label()
-        except requests.exceptions.RequestException as e:
-            messagebox.showerror("", f"No Internet")
-            pass
+# Tables
 
-def make_bet_dozen(value, bet):
-    global balance, user_id, table_id
-    
-    type = "doz"
-    
-    # Bet
-    try:
-        amount = int(bet.get())
-    except:
-        amount = 0.0
-    if amount > balance: 
-        messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname (Optional)")
-    elif (amount < 0) and (str(user_id) != '777'):
-        messagebox.showwarning("", "are u hacker?")
-    elif amount == 0:
-        messagebox.showwarning("", "ZERO?")
-    else:
-        try:
-            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': value, 'amount': amount})
-            r.raise_for_status()
-            balance -= amount           # update balance
-            update_balance_label()
-            update_random_label()
-        except requests.exceptions.RequestException as e:
-            messagebox.showerror("", f"No Internet{e}")
-            pass
-    
-def make_bet_color(value, bet):
-    global balance, user_id, table_id
-    
-    type = "color"
-    
-    # Bet
-    try:
-        amount = int(bet.get())
-    except:
-        amount = 0.0
-        
-    if amount > balance: 
-        messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname (Optional)")
-    elif (amount < 0) and (str(user_id) != '777'):
-        messagebox.showwarning("", "are u hacker?")
-    elif amount == 0:
-        messagebox.showwarning("", "ZERO?")
-    else:
-        try:
-            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': value, 'amount': amount})
-            r.raise_for_status()
-            balance -= amount           # update balance
-            update_balance_label()
-            update_random_label()
-        except requests.exceptions.RequestException as e:
-            messagebox.showerror("", f"No Internet")
-            pass    
-
-
-
-    
-def open_login_window():    #Erstellt ein Anmeldefenster, in dem der Benutzer seinen Namen eingeben und sich authentifizieren kann. 
-    global login_window, entry_name
-    login_window = Tk()
-    login_window.title("Auth")
-
-    label_name = Label(login_window, text="Name:")
-    label_name.grid(row=0, column=0, padx=20, pady=5)
-
-    entry_name = Entry(login_window)
-    entry_name.grid(row=0, column=1, padx=20, pady=5)
-
-    button_register = Button(login_window, text="Auth", command=register_user)
-    button_register.grid(row=1, columnspan=2, pady=20)
-
-    login_window.mainloop()
-    
-def update_balance_label():
-    balance_label.config(text=f"Balance: {str(balance)}")
-    
-    
-def update_random_label():
-    try:
-        r = requests.get(f"{url}/get_result/{table_id}")
-        r.raise_for_status()
-        random = r.json()['result']
-        if random < 10:
-            random_label.config(text=f"{str(random)}", width=1)
-        else:
-            random_label.config(text=f"{str(random)}", width=2)
-            
-    except requests.exceptions.RequestException as e:
-        messagebox.showerror("", f"{e}")
-    
 def open_table_window(): 
     global table_windows
     table_windows = Tk()
@@ -213,9 +95,6 @@ def open_table_window():
     gameframe.grid(column=0, row=0)
     table_windows.columnconfigure(0, weight=1)
     table_windows.rowconfigure(0, weight=1)
-    
-    #label_table_choose = Label(gameframe, text="Choose Game Table")
-    #label_table_choose.grid(row=0, column=0, sticky=(W,N))
     
     try:
         r = requests.get(f"{url}/tables")
@@ -229,14 +108,10 @@ def open_table_window():
 
     except requests.exceptions.RequestException as e:
         messagebox.showerror("", f"No Internet")
-
-    
-    '''
-    button_update = Button(table_windows, text="Update", command=update_tables)
-    button_update.grid(row=0, column=1)
-    '''
-    
+        
     table_windows.mainloop()
+
+
 
 def choose_table(table):
     global table_id, table_windows
@@ -244,6 +119,8 @@ def choose_table(table):
     
     table_windows.destroy()
     open_game_window() 
+    
+    
     
 def update_tables():
     global table_id
@@ -254,19 +131,235 @@ def update_tables():
         tables_arr = r.json()['tables']
         for table in tables_arr:
             Button(table_windows, text=f"Table {table}", command=lambda table=table: choose_table(table)).grid(row=2, column=table+5, sticky=(S, E))
-
-        
-        
-        #login_window.destroy()
-        #open_game_window()
     except requests.exceptions.RequestException as e:
         messagebox.showerror("", f"No Internet")
     
 
+
+
+
+
+# BETS ------------------------------
+
+# Make a bet with a number  
+def make_bet_digit(number, bet):  
+    global balance, user_id, table_id
     
-def open_game_window():       # Erstellt das Hauptfenster des Spiels, in dem der Benutzer Wetten platzieren kann.
-                              # Initialisiert Schaltflächen für jede Zahl auf dem Rouletterad und färbt diese entsprechend der Zugehörigkeit zur Kategorie "Schwarz" oder "Rot".
+    type = "number"
+    value = str(number)
+    
+    # Bet
+    try:
+        amount = int(bet.get())
+    except:
+        amount = 0
+    if amount > balance: 
+        messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname (Optional)")
+    elif amount < 0:
+        messagebox.showwarning("", "are u hacker?")
+    elif amount == 0:
+        messagebox.showwarning("", "ZERO?")
+    else:
+        try:
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': value, 'amount': amount})
+            r.raise_for_status()
+            
+            # update balance local
+            balance -= amount 
+            update_balance_label()
+        except requests.exceptions.RequestException as e:
+            messagebox.showerror("", f"No Internet")
+            pass
+        
+        
+    
+def make_bet_col(value, bet):
+    global balance, user_id, table_id
+    
+    type = "col"
+    
+    # Bet
+    try:
+        amount = int(bet.get())
+    except:
+        amount = 0
+    if amount > balance: 
+        messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname (Optional)")
+    elif amount < 0:
+        messagebox.showwarning("", "are u hacker?")
+    elif amount == 0:
+        messagebox.showwarning("", "ZERO?")
+    else:
+        try:
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': str(value), 'amount': amount})
+            r.raise_for_status()
+            
+            # update balance local
+            balance -= amount 
+            update_balance_label()
+        except requests.exceptions.RequestException as e:
+            messagebox.showerror("", f"No Internet")
+            pass
+
+
+
+def make_bet_dozen(value, bet):
+    global balance, user_id, table_id
+    
+    type = "doz"
+    
+    # Bet
+    try:
+        amount = int(bet.get())
+    except:
+        amount = 0
+    if amount > balance: 
+        messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname (Optional)")
+    elif amount < 0:
+        messagebox.showwarning("", "are u hacker?")
+    elif amount == 0:
+        messagebox.showwarning("", "ZERO?")
+    else:
+        try:
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': str(value), 'amount': amount})
+            r.raise_for_status()
+            
+            # update balance local
+            balance -= amount 
+            update_balance_label()
+        except requests.exceptions.RequestException as e:
+            messagebox.showerror("", f"No Internet")
+            pass
+    
+    
+    
+def make_bet_color(value, bet):
+    global balance, user_id, table_id
+    
+    type = "color"
+    
+    # Bet
+    try:
+        amount = int(bet.get())
+    except:
+        amount = 0
+    if amount > balance: 
+        messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname (Optional)")
+    elif amount < 0:
+        messagebox.showwarning("", "are u hacker?")
+    elif amount == 0:
+        messagebox.showwarning("", "ZERO?")
+    else:
+        try:
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': str(value), 'amount': amount})
+            r.raise_for_status()
+            
+            # update balance local
+            balance -= amount 
+            update_balance_label()
+        except requests.exceptions.RequestException as e:
+            messagebox.showerror("", f"No Internet")
+            pass  
+
+
+
+def make_bet_parity(value, bet):
+    global balance, user_id, table_id
+    
+    type = "parity"
+    
+    # Bet
+    try:
+        amount = int(bet.get())
+    except:
+        amount = 0
+    if amount > balance: 
+        messagebox.showwarning("", "Du hast kein Geld mehr\n\n Guthaben aufladen?\n\n Paypal: @perf007\n Text: nickname (Optional)")
+    elif amount < 0:
+        messagebox.showwarning("", "are u hacker?")
+    elif amount == 0:
+        messagebox.showwarning("", "ZERO?")
+    else:
+        try:
+            r = requests.post(f"{url}/bet", json = {'user_id': str(user_id), "table_id": table_id - 1, "type": type, 'value': str(value), 'amount': amount})
+            r.raise_for_status()
+            
+            # update balance local
+            balance -= amount 
+            update_balance_label()
+        except requests.exceptions.RequestException as e:
+            messagebox.showerror("", f"No Internet")
+            pass
+
+
+
+    
+    
+    
+    
+# UPDATES  ------------------------------
+def update_balance_label():
+    balance_label.config(text=f"Balance: {str(balance)}")
+    
+def update_balance(server_balance):
+    global balance
+    balance += server_balance
+    update_balance_label()
+    
+    
+def update_random_label(random):
+    if random < 10:
+        random_label.config(text=f"{str(random)}", width=1)
+    else:
+        random_label.config(text=f"{str(random)}", width=2)
+            
+    
+    
+    
+    
+# GAME  ------------------------------
+    
+async def listen_for_updates():
+    url = "ws://127.0.0.1:8000/ws"
+    print("Connecting")
+    async with websockets.connect(url) as websocket:
+        print("Connected")
+        while True:
+            try:
+                message = await websocket.recv()
+                data = json.loads(message)
+                
+                result = data['result']
+                server_update = data['balance']
+                win = data['win']
+                
+                if 0 == win:
+                    print('verloren')
+                else:
+                    print('gewonnen')
+                
+                update_random_label(int(result))
+                update_balance(server_update)
+                
+            except websockets.ConnectionClosed:
+                break
+
+
+
+def start_websocket():
+    def run_loop(loop):
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(listen_for_updates())
+    
+    loop = asyncio.new_event_loop()
+    t = threading.Thread(target=run_loop, args=(loop,))
+    t.start()
+    
+    
+    
+def open_game_window():
     global root, balance_label, random, random_label, black
+    
     # Main window
     root = Tk()
     root.title("Fairoulette")
@@ -307,7 +400,7 @@ def open_game_window():       # Erstellt das Hauptfenster des Spiels, in dem der
     wheel_label = ttk.Label(Entrys, image=wheel)
     wheel_label.grid(column=0, row=5)
     
-    random_label = ttk.Label(Entrys, text=f"{str(random)}")
+    random_label = ttk.Label(Entrys, text=f"-")
     random_label.config(font=("Courier", 64), width=1)
     random_label.grid(column=0, row=5)
     
@@ -407,6 +500,19 @@ def open_game_window():       # Erstellt das Hauptfenster des Spiels, in dem der
     Button(frame_buttons, text=f"2 to 1", command=lambda i=1: make_bet_col(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=1)
     Button(frame_buttons, text=f"2 to 1", command=lambda i=2: make_bet_col(i, feet), width=15, height=2,bg="darkblue", fg="white").grid(column=0, row=2)
     
+    # Parity
+    
+    frame_buttons = ttk.Frame(frame_all_buttons)
+    frame_buttons.grid(row = 6, column = 2)
+    frame_buttons.grid_columnconfigure((0,1), weight = 1)
+    frame_buttons.grid_rowconfigure(0, weight = 1)
+    
+    
+    Button(frame_buttons, text=f"Even", command=lambda i=0: make_bet_parity(i, feet), width=15, height=2,bg="white", fg="black").grid(column=0, row=0)
+    Label(frame_buttons, text="                                                                    ").grid(column=1, row=0)
+    Button(frame_buttons, text=f"Odd", command=lambda i=1: make_bet_parity(i, feet), width=15, height=2,bg="white", fg="black").grid(column=2, row=0)
+    
+    
     # Color bet
     
     frame_buttons = ttk.Frame(frame_all_buttons)
@@ -419,12 +525,15 @@ def open_game_window():       # Erstellt das Hauptfenster des Spiels, in dem der
     Button(frame_buttons, text=f"RED", command=lambda i=1: make_bet_color("black", feet), width=35, height=2,bg="#8B0000", fg="white").grid(column=1, row=0)
 
     feet_entry.focus()
+    
+    # Listening for (updates) Daten from Server
+    start_websocket()
 
     root.mainloop()
     
     
 
-def is_black(i):       #Hilfsfunktion, die bestimmt, ob eine Zahl schwarz ist, basierend auf einer vorgegebenen Liste von schwarzen Zahlen.
+def is_black(i):   
     if i in black:
         return 'black'
     else:

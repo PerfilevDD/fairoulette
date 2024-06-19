@@ -44,7 +44,9 @@ def create_table(db: Session):
 
 def process_bet(db: Session, bet_id, user_id, table_id, earnings: int):
     try:
+        print(user_id)
         user = db.query(models.User).get(user_id)
+        
     except Exception as e:
         # TODO: Add Exception when bet is not foud
         pass

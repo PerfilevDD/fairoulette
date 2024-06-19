@@ -96,15 +96,9 @@ def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
     if bet.type == 'number':
         new_bet.add_number_bet(int(bet.value), bet.amount)
     elif bet.type == 'col':
-        # wir bekommen ein Array in str
-        for digit in range(len(bet.value.split(",")) - 1):
-            value = bet.value.split(",")[digit]
-            new_bet.add_dozen_bet(int(value), bet.amount)
+        new_bet.add_dozen_bet(int(bet.value), bet.amount)
     elif bet.type == 'doz':
-        # wir bekommen ein Array in str
-        for digit in range(len(bet.value.split(",")) - 1):
-            value = bet.value.split(",")[digit]
-            new_bet.add_dozen_bet(int(value), bet.amount)
+        new_bet.add_dozen_bet(int(bet.value), bet.amount)
     elif bet.type == 'color':
         if 'red' == bet.value:
             new_bet.add_red_bet(bet.amount)

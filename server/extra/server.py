@@ -80,8 +80,19 @@ def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
 
     db_bet = crud.create_bet(db=db, user_id=bet.user_id, table_id=bet.table_id, type=bet.type, value=bet.value, amount=bet.amount)
     new_bet = Bet(bet.user_id, db_bet.id)
-    
-    # bet's types
+    user = crud.get_user_id(db, bet.user_id)
+
+    if user.balance < bet.amount:
+        raise HTTPException(
+            status=500,
+            details="Not enough balance to do this."
+        )
+
+    user.balance -= bet.amount
+
+
+
+# bet's types
     if bet.type == 'number':
         new_bet.add_number_bet(int(bet.value), bet.amount)
     elif bet.type == 'col':
@@ -102,8 +113,6 @@ def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
         
     tables[bet.table_id].add_or_update_bet_for_participant(bet.user_id, new_bet)
     
-    user = crud.get_user_id(db, bet.user_id)
-    user.balance -= bet.amount
 
     return crud.create_bet(db=db, user_id=bet.user_id, table_id=bet.table_id, type=bet.type, value=bet.value, amount=bet.amount)
 

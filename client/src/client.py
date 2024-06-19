@@ -7,10 +7,10 @@ from PIL import Image, ImageTk
 url = "http://localhost:8000"
 
 # Global
-balance = 100          # Hält das aktuelle Guthaben des Spielers 
-user_id = 777          # Speichert die ID des aktuellen Benutzers 
+balance = 0          # Hält das aktuelle Guthaben des Spielers 
+user_id = 0          # Speichert die ID des aktuellen Benutzers 
 random = 0           # Speichert eine zufällige Zahl "das letzte Ergebnis des Roulettrads"
-table_id = 2         # Tisch-ID
+table_id = 0         # Tisch-ID
 
 def check_user(name):
     try:

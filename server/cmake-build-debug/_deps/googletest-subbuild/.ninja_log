@@ -1,23 +1,3 @@
 # ninja log v6
-546	551	1718701309030133839	googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-configure	30efe339c41d708
-546	551	1718701309030133839	/home/kastel-stud15/Documents/dev/uni/fairoulette/server/cmake-build-debug/_deps/googletest-subbuild/googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-configure	30efe339c41d708
-562	567	1718701309046133980	/home/kastel-stud15/Documents/dev/uni/fairoulette/server/cmake-build-debug/_deps/googletest-subbuild/googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-test	fff9e33fb49879eb
-541	546	1718701309026133805	/home/kastel-stud15/Documents/dev/uni/fairoulette/server/cmake-build-debug/_deps/googletest-subbuild/googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-patch	8e6337fba32aa6f
-535	540	1718701309022133770	/home/kastel-stud15/Documents/dev/uni/fairoulette/server/cmake-build-debug/_deps/googletest-subbuild/googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-update	8b316f2ff3cd969d
-535	540	1718701309022133770	googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-update	8b316f2ff3cd969d
-556	562	1718701309042133945	/home/kastel-stud15/Documents/dev/uni/fairoulette/server/cmake-build-debug/_deps/googletest-subbuild/googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-install	a614c99d35f3754d
-7	535	1718701309014133700	/home/kastel-stud15/Documents/dev/uni/fairoulette/server/cmake-build-debug/_deps/googletest-subbuild/googletest-populate-prefix/src/03597a01ee50ed33e9dfd640b249b4be3799d395.zip	7de2900d79e7033f
-7	535	1718701309014133700	googletest-populate-prefix/src/03597a01ee50ed33e9dfd640b249b4be3799d395.zip	7de2900d79e7033f
-567	575	1718701309054134051	/home/kastel-stud15/Documents/dev/uni/fairoulette/server/cmake-build-debug/_deps/googletest-subbuild/googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-done	6ebb993a6b1e4153
-567	575	1718701309054134051	CMakeFiles/googletest-populate-complete	6ebb993a6b1e4153
-551	556	1718701309034133875	/home/kastel-stud15/Documents/dev/uni/fairoulette/server/cmake-build-debug/_deps/googletest-subbuild/googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-build	482d2e99c63991c5
-551	556	1718701309034133875	googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-build	482d2e99c63991c5
-567	575	1718701309054134051	/home/kastel-stud15/Documents/dev/uni/fairoulette/server/cmake-build-debug/_deps/googletest-subbuild/CMakeFiles/googletest-populate-complete	6ebb993a6b1e4153
-562	567	1718701309046133980	googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-test	fff9e33fb49879eb
-0	7	1718701308486129064	/home/kastel-stud15/Documents/dev/uni/fairoulette/server/cmake-build-debug/_deps/googletest-subbuild/googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-mkdir	978600d588e30905
-556	562	1718701309042133945	googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-install	a614c99d35f3754d
-0	7	1718701308486129064	googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-mkdir	978600d588e30905
-7	535	1718701309014133700	/home/kastel-stud15/Documents/dev/uni/fairoulette/server/cmake-build-debug/_deps/googletest-subbuild/googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-download	7de2900d79e7033f
-541	546	1718701309026133805	googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-patch	8e6337fba32aa6f
-7	535	1718701309014133700	googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-download	7de2900d79e7033f
-567	575	1718701309054134051	googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-done	6ebb993a6b1e4153
+1	32	1718794654763582494	googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-mkdir	978600d588e30905
+1	32	1718794654763582494	/home/kastel-stud15/Documents/dev/uni/fairoulette/server/cmake-build-debug/_deps/googletest-subbuild/googletest-populate-prefix/src/googletest-populate-stamp/googletest-populate-mkdir	978600d588e30905

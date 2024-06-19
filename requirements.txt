@@ -5,3 +5,4 @@ pydantic
 aiofiles
 pybind11
 uvicorn
+pysqlite3

@@ -4,6 +4,7 @@
 #include "ctime"
 #include "list"
 #include "vector"
+#include <pybind11/stl.h>
 
 namespace Fairoulette {
 class Table {
@@ -13,6 +14,8 @@ class Table {
     void add_participant(int pid);
     void add_or_update_bet_for_participant(int pid, Bet bet);
     int calculate_result();
+
+    pybind11::list get_and_clear_bets();
 
     int get_table_id(){
         return table_id;

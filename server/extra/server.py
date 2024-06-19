@@ -18,10 +18,35 @@ import time
 import threading
 
 tables: list[Table] = []
-results: list[int] = [0,0,0] # todo: auto size etc
+results: list[int] = []
+round_duration: int = 5
+
+async def run_roulette_game():
+    while True:
+        await asyncio.sleep(round_duration)
+        for table in tables:
+            result_random = table.calculate_result()
+            results[table.get_table_id() - 1] = result_random
+            print(f"Table: {table.get_table_id()} - Result: {result_random}")
+            for bet in table.get_and_clear_bets():
+                received = bet.calculate_result(result_random)
+                placed_sum = bet.get_bet_worth()
+                print("Bet", bet.get_bet_id(), "for user", bet.get_user_id() ,"placed", placed_sum, "and received", received)
+
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    for table in crud.get_tables(next(get_db())):
+        tables.append(Table(table.id))
+        results.append(-1)
+    asyncio.create_task(run_roulette_game())
+    yield
+
 
 app = FastAPI(
-    title="Fairroulette"
+    title="Fairroulette",
+    lifespan=lifespan
 )
 
 # Database
@@ -121,27 +146,15 @@ async def redirect():
     return RedirectResponse(url="/docs")
 
 
-async def run_roulette_game():
-    global result_random, results
-    while True:
-        await asyncio.sleep(5)
-        for table in tables:
-            result_random = table.calculate_result()
-            results[table.get_table_id() - 1] = result_random
-            print(f"Table: {table.get_table_id()} - Result: {result_random}")
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    for table in crud.get_tables(next(get_db())):
-        tables.append(Table(table.id))
-    asyncio.create_task(run_roulette_game())
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-rd', '--round_duration', default=30)
+    parser.add_argument('-rd', '--round_duration', type=int,  default=30)
     parser.add_argument('-p', '--port', type=int, default=8000, help="The port on which the api will be accessible.")
     parser.add_argument('-ho', '--host', default="localhost", help="The host on which the api will be accessible.")
     args = parser.parse_args()
 
     round_duration = args.round_duration
+    print(f"Round duration is set at {round_duration}")
+
     uvicorn.run(app, host=args.host, port=args.port)

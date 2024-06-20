@@ -46,6 +46,7 @@ async def run_roulette_game(db: Session):
                     win_client = 1
                 else:
                     win_client = 0
+        crud.close_all_open_bets(db=db)
                     
                     
             # Websocket
@@ -192,6 +193,7 @@ async def get_tables(db: Session = Depends(get_db)):
 @app.post("/table", tags=["Table"])
 async def create_table(db: Session = Depends(get_db)):
     table = crud.create_table(db)
+    tables.append(table.id)
     return {
         "table": table.id
     }

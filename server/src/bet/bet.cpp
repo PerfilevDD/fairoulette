@@ -30,7 +30,7 @@ namespace Fairoulette {
 
     void Bet::add_number_bet(int number, int worth) { // Fügt einen Betrag zu einer spezifischen null und 36
         if (!(number >= 0 && number <= 36)) {
-            // TODO: Throw error for not in bounds
+          
         }
         number_bets[number] += worth;
         bet_worth += worth;
@@ -51,7 +51,7 @@ namespace Fairoulette {
                 bet_worth += worth;
                 break;
             default:
-                // Todo: Throw error
+              
                 break;
         }
     }
@@ -71,7 +71,7 @@ namespace Fairoulette {
                 bet_worth += worth;
                 break;
             default:
-                // Todo: Throw error
+               
                 break;
         }
     }

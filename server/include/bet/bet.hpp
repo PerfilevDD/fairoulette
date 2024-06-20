@@ -8,8 +8,6 @@ struct OutsideBets {
     int even = 0;
     int red = 0;
     int black = 0;
-    int high = 0;
-    int low = 0;
     int col1 = 0;
     int col2 = 0;
     int col3 = 0;
@@ -20,8 +18,8 @@ struct OutsideBets {
 
 class Bet {
    public:
-    Bet(int user_id, int bet_id);
-    int calculate_result(int number);
+    Bet(int user_id, int bet_id);       // Eine Instanz mit Benutzer und Wetten-ID wird erstellt
+    int calculate_result(int number);   // Berechnet und gibt das Ergebnis der Wetten basierend auf der Gewinnzahl number zurück.
     void add_number_bet(int number, int worth);
     void add_red_bet(int worth);
     void add_black_bet(int worth);

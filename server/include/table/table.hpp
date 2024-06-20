@@ -12,8 +12,10 @@ class Table {
     Table(int table_id);
 
     void add_participant(int pid);
-    void add_or_update_bet_for_participant(int pid, Bet bet);
+    void add_or_update_bet_by_bet_id(int pid, Bet bet);
     int calculate_result();
+
+    Bet get_bet_by_bet_id(int bet_id);
 
     pybind11::list get_and_clear_bets();
 

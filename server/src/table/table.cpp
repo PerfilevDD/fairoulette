@@ -35,6 +35,5 @@ namespace Fairoulette {
                 return (*it);
             }
         }
-        throw std::out_of_range()
     }
 }

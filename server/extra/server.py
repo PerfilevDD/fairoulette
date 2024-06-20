@@ -46,9 +46,9 @@ async def run_roulette_game(db: Session):
                     win_client = 1
                 else:
                     win_client = 0
-        crud.close_all_open_bets(db=db)
-                    
-                    
+
+            crud.close_all_open_bets(db=db)
+
             # Websocket
             data = {"result": result_random, "balance": balance_to_client, "win": win_client}
             for client in clients:

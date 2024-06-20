@@ -350,6 +350,10 @@ async def listen_for_updates():
                 result = data['result']
                 server_update = data['balance']
                 win = data['win']
+                user_from_server = data['user_id']
+                
+                if(user_from_server != user_id):
+                    continue
                 
                 if 0 == win:
                     result_func(0)

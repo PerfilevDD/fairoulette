@@ -42,7 +42,7 @@ def open_login_window():    #Erstellt ein Anmeldefenster, in dem der Benutzer se
     
     entry_url = Entry(login_window)
     entry_url.grid(row=1, column=1, padx=20, pady=5)
-    entry_url.insert(0, 'localhost:8000')
+    entry_url.insert(0, 'http://localhost:8000')
 
     button_register = Button(login_window, text="Auth", command=register_user)
     button_register.grid(row=2, column=1, pady=20)
@@ -73,7 +73,7 @@ def register_user():     # wird aufgerufen, wenn sich ein Benutzer angemeldet ha
     
     url_label = entry_url.get()
     
-    url = "http://" + url_label
+    url = url_label
     
     
     user_data = check_user(name)
@@ -338,9 +338,9 @@ def update_random_label(random):
 # GAME  ------------------------------
     
 async def listen_for_updates():
-    url = "ws://127.0.0.1:8000/ws"
+    ws_url = url.replace('http', 'ws').replace('htpps', 'wss') + '/ws'
     print("Connecting")
-    async with websockets.connect(url) as websocket:
+    async with websockets.connect(ws_url) as websocket:
         print("Connected")
         while True:
             try:

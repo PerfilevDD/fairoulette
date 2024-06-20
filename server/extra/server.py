@@ -50,8 +50,8 @@ async def run_roulette_game(db: Session):
             crud.close_all_open_bets(db=db)
 
             # Websocket
-            data = {"result": result_random, "balance": balance_to_client, "win": win_client}
             for client in clients:
+                data = {"result": result_random, "balance": balance_to_client, "win": win_client, 'user_id': bet.get_user_id()}
                 try:
                     await client.send_text(json.dumps(data))
                 except Exception as e:

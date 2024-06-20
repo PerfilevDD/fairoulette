@@ -26,18 +26,26 @@ delay_time = 5       # In Second
 # LOGIN ------------------------------
 
 def open_login_window():    #Erstellt ein Anmeldefenster, in dem der Benutzer seinen Namen eingeben und sich authentifizieren kann. 
-    global login_window, entry_name
+    global login_window, entry_name, entry_url
     login_window = Tk()
     login_window.title("Auth")
 
     label_name = Label(login_window, text="Name:")
     label_name.grid(row=0, column=0, padx=20, pady=5)
+    
+    
+    label_url = Label(login_window, text="URL:")
+    label_url.grid(row=1, column=0, padx=20, pady=5)
 
     entry_name = Entry(login_window)
     entry_name.grid(row=0, column=1, padx=20, pady=5)
+    
+    entry_url = Entry(login_window)
+    entry_url.grid(row=1, column=1, padx=20, pady=5)
+    entry_url.insert(0, 'localhost:8000')
 
     button_register = Button(login_window, text="Auth", command=register_user)
-    button_register.grid(row=1, columnspan=2, pady=20)
+    button_register.grid(row=2, column=1, pady=20)
 
     login_window.mainloop()
 
@@ -56,10 +64,17 @@ def check_user(name):
 def register_user():     # wird aufgerufen, wenn sich ein Benutzer angemeldet hat bzw. anmeldet
     global balance
     global user_id
+    global url
+    
     name = entry_name.get()
     if not name:         # Überprüft, ob der Name eingegeben wurde, und registriert den Benutzer über das Backend, wenn er noch nicht existiert.
         messagebox.showwarning("", "Wir sollen deinen Namen wissen, looser")
         return
+    
+    url_label = entry_url.get()
+    
+    url = "http://" + url_label
+    
     
     user_data = check_user(name)
     print(user_data)
@@ -83,7 +98,7 @@ def register_user():     # wird aufgerufen, wenn sich ein Benutzer angemeldet ha
             login_window.destroy()
             open_table_window()
         except requests.exceptions.RequestException as e:
-            messagebox.showerror("", f"No Internet")
+            messagebox.showerror("", f"No Internet {e}")
 
 
 # Tables
@@ -506,10 +521,10 @@ def open_game_window():
     frame_buttons.grid_columnconfigure((0,1), weight = 1)
     frame_buttons.grid_rowconfigure(0, weight = 1)
     
-    black = [2,4,6,8,10,11,13,15,17,20,22,24,27,29,30,32,34,36]
-    f_row = [3,6,9,12,15,18,21,24,28,31,34,37]
-    s_row = [2,5,8,11,14,17,20,23,27,30,33,36]
-    th_row = [1,4,7,10,13,16,19,22,26,29,32,35]
+    black = [1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]
+    f_row = [3,6,9,12,15,18,21,24,27,30,33,36]
+    s_row = [2,5,8,11,14,17,20,23,26,29,32,35]
+    th_row = [1,4,7,10,13,16,19,22,25,28,31,34]
     
     rows = [f_row, s_row, th_row]
     row_numbers = 0

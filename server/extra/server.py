@@ -61,11 +61,13 @@ async def run_roulette_game(db: Session):
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     db = next(get_db())
+    crud.close_all_open_bets(db)
     for table in crud.get_tables(db):
         tables.append(Table(table.id))
         results.append(-1)
     asyncio.create_task(run_roulette_game(db))
     yield
+    crud.close_all_open_bets(db)
 
 
 app = FastAPI(
@@ -107,8 +109,22 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 @app.post("/bet", response_model=schemas.Bet, tags=["Bet"])
 def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
 
-    db_bet = crud.create_bet(db=db, user_id=bet.user_id, table_id=bet.table_id, type=bet.type, value=bet.value, amount=bet.amount)
-    new_bet = Bet(bet.user_id, db_bet.id)
+    db_bet = crud.check_if_user_has_open_bet(db=db, user_id=bet.user_id, table_id=bet.table_id)
+
+    if db_bet:
+        print("User is editing bet", db_bet.id)
+        bet_obj = tables[bet.table_id].get_bet_by_bet_id(db_bet.id)
+        db_bet.type = "multibet"
+        db_bet.value = "*"
+        db_bet.amount += bet.amount
+        db.commit()
+
+
+    else:
+        print("User created a new bet.")
+        db_bet = crud.create_bet(db=db, user_id=bet.user_id, table_id=bet.table_id, type=bet.type, value=bet.value, amount=bet.amount)
+        bet_obj = Bet(bet.user_id, db_bet.id)
+
     user = crud.get_user_id(db, bet.user_id)
 
     if user.balance < bet.amount:
@@ -123,27 +139,25 @@ def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
 
 # bet's types
     if 'number' == bet.type:
-        new_bet.add_number_bet(int(bet.value), bet.amount)
+        bet_obj.add_number_bet(int(bet.value), bet.amount)
     elif 'col' == bet.type:
-        new_bet.add_dozen_bet(int(bet.value), bet.amount)
+        bet_obj.add_dozen_bet(int(bet.value), bet.amount)
     elif 'doz' == bet.type:
-        print('ff')
-        new_bet.add_dozen_bet(int(bet.value), bet.amount)
+        bet_obj.add_dozen_bet(int(bet.value), bet.amount)
     elif 'parity' == bet.type:
         if '0' == bet.value:
-            new_bet.add_even_bet(bet.amount)
+            bet_obj.add_even_bet(bet.amount)
         else:
-            new_bet.add_odd_bet(bet.amount)
+            bet_obj.add_odd_bet(bet.amount)
     elif 'color' == bet.type:
         if 'red' == bet.value:
-            new_bet.add_red_bet(bet.amount)
+            bet_obj.add_red_bet(bet.amount)
         else:
-            new_bet.add_black_bet(bet.amount)
+            bet_obj.add_black_bet(bet.amount)
         
-    tables[bet.table_id].add_or_update_bet_for_participant(bet.user_id, new_bet)
-    
+    tables[bet.table_id].add_or_update_bet_by_bet_id(db_bet.id, bet_obj)
 
-    return crud.create_bet(db=db, user_id=bet.user_id, table_id=bet.table_id, type=bet.type, value=bet.value, amount=bet.amount)
+    return db_bet
 
 
 

@@ -15,10 +15,10 @@ PYBIND11_MODULE(fairoulette, m) {
     pybind11::class_<Table>(m, "Table")
         .def(pybind11::init<int>())
         .def("calculate_result", &Table::calculate_result)
-        .def("add_participant", &Table::add_participant)
         .def("get_table_id", &Table::get_table_id)
-        .def("add_or_update_bet_for_participant", &Table::add_or_update_bet_for_participant)
-        .def("get_and_clear_bets", &Table::get_and_clear_bets);
+        .def("add_or_update_bet_by_bet_id", &Table::add_or_update_bet_by_bet_id)
+        .def("get_and_clear_bets", &Table::get_and_clear_bets)
+        .def("get_bet_by_bet_id", &Table::get_bet_by_bet_id);
 
     pybind11::class_<Bet>(m, "Bet")
         .def(pybind11::init<int, int>())

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Float, Integer
+from sqlalchemy import Column, String, Float, Integer, Boolean
 
 from database.database import Base
 
@@ -20,6 +20,7 @@ class Bet(Base):
     type = Column(String, nullable=False)
     value = Column(String, nullable=False)
     amount = Column(Integer, nullable=False)
+    completed = Column(Boolean, default=False)
 
 class RouletteTable(Base):
     __tablename__ = "roulette_table"

@@ -1,4 +1,4 @@
-from sqlalchemy import and_
+from sqlalchemy import and_, update
 from sqlalchemy.orm import Session
 
 import database.models as models
@@ -27,6 +27,14 @@ def create_user(db: Session, name: str):
     db.refresh(db_user)
     return db_user
 
+def check_if_user_has_open_bet(db: Session, user_id: int, table_id: int):
+    bet = db.query(models.Bet) \
+        .filter(models.Bet.completed == False) \
+        .filter(models.Bet.user_id == user_id) \
+        .filter(models.Bet.table_id == table_id) \
+        .first()
+
+    return bet if bet else False
 
 def create_bet(db: Session, user_id: int, table_id: int, type: str, value: str, amount: float):
     db_bet = models.Bet(user_id=user_id, table_id=table_id, type=type, value=value, amount=amount)
@@ -44,9 +52,8 @@ def create_table(db: Session):
 
 def process_bet(db: Session, bet_id, user_id, table_id, earnings: int):
     try:
-        print(user_id)
         user = db.query(models.User).get(user_id)
-        
+        bet = db.query(models.Bet).get(bet_id)
     except Exception as e:
         return
 
@@ -58,6 +65,7 @@ def process_bet(db: Session, bet_id, user_id, table_id, earnings: int):
     )
 
     user.balance += earnings
+    bet.completed = True
 
     db.add(db_balance_history)
     db.commit()
@@ -68,8 +76,13 @@ def get_tables(db: Session):
     for table in tables:
         yield table
 
-
-
-
+def close_all_open_bets(db: Session):
+    stmt = (
+        update(models.Bet).
+        where(models.Bet.completed == False).
+        values(completed = True)
+    )
+    db.execute(statement=stmt)
+    db.commit()
 
 

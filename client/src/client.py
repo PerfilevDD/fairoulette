@@ -352,13 +352,11 @@ async def listen_for_updates():
                 win = data['win']
                 user_from_server = data['user_id']
                 
-                if(user_from_server != user_id):
-                    continue
-                
-                if 0 == win:
-                    result_func(0)
-                elif 1 == win:
-                    result_func(1)
+                if(user_from_server == user_id):
+                    if 0 == win:
+                        result_func(0)
+                    elif 1 == win:
+                        result_func(1)
                 
                 update_random_label(int(result))
                 update_balance(server_update)

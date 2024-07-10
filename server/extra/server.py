@@ -52,14 +52,14 @@ async def run_roulette_game(db: Session):
                     # Websocket
 
                 for client in clients:
-                    await update_user(client, win_client, user_db.balance, bet, result_random)
+                    await update_user(client, win_client, user_db.balance, bet, result_random, table.get_table_id())
 
-            await update_random_client(result_random, table_id=table.get_table_id())
+            await update_random_client(result_random, table.get_table_id())
 
             crud.close_all_open_bets(db=db)
 
 
-async def update_user(client, win_client, balance, bet, result_random):
+async def update_user(client, win_client, balance, bet, result_random, table_id):
     data = {"is_update": 1, "result": result_random, "balance": balance, "win": win_client,
             'user_id': bet.get_user_id(), "table_id": table_id}
     try:

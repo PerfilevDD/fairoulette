@@ -1,3 +1,5 @@
+# LINK FOR POOSE PRESENTATION: https://fairoulette.ctrl-felix.de/
+
 # Fairoulette
 
 A fair copy of Game Roulette

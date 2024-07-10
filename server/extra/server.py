@@ -155,10 +155,10 @@ def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
         )
 
     user.balance -= bet.amount
+    db.commit()
 
 
-
-# bet's types
+    # bet's types
     if 'number' == bet.type:
         bet_obj.add_number_bet(int(bet.value), bet.amount)
     elif 'col' == bet.type:

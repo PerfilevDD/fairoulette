@@ -26,58 +26,73 @@ delay_time = 5       # In Second
 # LOGIN ------------------------------
 
 def open_login_window():    #Erstellt ein Anmeldefenster, in dem der Benutzer seinen Namen eingeben und sich authentifizieren kann. 
-    global login_window, entry_name, entry_url
+    global login_window, entry_name, entry_url, entry_pass
     login_window = Tk()
     login_window.title("Auth")
 
     label_name = Label(login_window, text="Name:")
     label_name.grid(row=0, column=0, padx=20, pady=5)
     
-    
-    label_url = Label(login_window, text="URL:")
-    label_url.grid(row=1, column=0, padx=20, pady=5)
-
     entry_name = Entry(login_window)
     entry_name.grid(row=0, column=1, padx=20, pady=5)
     
+    
+    
+    label_pass = Label(login_window, text="Pass:")
+    label_pass.grid(row=1, column=0, padx=20, pady=5)
+    
+    entry_pass = Entry(login_window)
+    entry_pass.grid(row=1, column=1, padx=20, pady=5)
+    entry_pass.config(show="*")
+    
+    
+    
+    label_url = Label(login_window, text="URL:")
+    label_url.grid(row=2, column=0, padx=20, pady=5)
+
     entry_url = Entry(login_window)
-    entry_url.grid(row=1, column=1, padx=20, pady=5)
+    entry_url.grid(row=2, column=1, padx=20, pady=5)
     entry_url.insert(0, 'http://localhost:8000')
 
-    button_register = Button(login_window, text="Auth", command=register_user)
-    button_register.grid(row=2, column=1, pady=20)
+    button_register = Button(login_window, text="Sign / Log In", command=register_user, width=20, height=2)
+    button_register.grid(row=4, column=1, pady=20)
 
     login_window.mainloop()
 
 
 
-def check_user(name):
+def check_user(name, passw):
     try:
-        r = requests.get(f"{url}/users/{name}")
+        r = requests.get(f"{url}/users/{name}", params = {"passw":passw})
         r.raise_for_status()
         return r.json()
-    except requests.exceptions.RequestException:
-        return None     # Bei einem Fehler wird "None" zurückgegeben
+    except requests.exceptions.RequestException as e:
+        return None   
 
 
 
-def register_user():     # wird aufgerufen, wenn sich ein Benutzer angemeldet hat bzw. anmeldet
+def register_user(): 
     global balance
     global user_id
     global url
+    global name
     
     name = entry_name.get()
-    if not name:         # Überprüft, ob der Name eingegeben wurde, und registriert den Benutzer über das Backend, wenn er noch nicht existiert.
+    passw = entry_pass.get()
+    if not name: 
         messagebox.showwarning("", "Wir sollen deinen Namen wissen, looser")
         return
+    if not passw:
+        messagebox.showwarning("", "Wir sollen dein Passwort wissen, looser")
+        return
+        
     
     url_label = entry_url.get()
     
     url = url_label
     
     
-    user_data = check_user(name)
-    print(user_data)
+    user_data = check_user(name, passw)
     if user_data:
         # User exists
         user_id = user_data['id']
@@ -86,9 +101,8 @@ def register_user():     # wird aufgerufen, wenn sich ein Benutzer angemeldet ha
         open_table_window()
     else:
         try:
-            r = requests.post(f"{url}/users/", json={'name': name})
+            r = requests.post(f"{url}/users/", json={'name': name, "passw": passw})
             r.raise_for_status()
-            print(r.json())
             messagebox.showinfo("", f"Willkommen, {name}, in the best Roulette in the world")
             
             # Daten for local
@@ -98,7 +112,7 @@ def register_user():     # wird aufgerufen, wenn sich ein Benutzer angemeldet ha
             login_window.destroy()
             open_table_window()
         except requests.exceptions.RequestException as e:
-            messagebox.showerror("", f"No Internet {e}")
+            messagebox.showerror("", f"{e.response.json()["detail"]}")
 
 
 # Tables
@@ -184,7 +198,7 @@ def make_bet_digit(number, bet):
             
             # update balance local
             balance -= amount 
-            update_balance_label()
+            update_balance_label_local()
         except requests.exceptions.RequestException as e:
             messagebox.showerror("", f"No Internet")
             pass
@@ -214,7 +228,7 @@ def make_bet_col(value, bet):
             
             # update balance local
             balance -= amount 
-            update_balance_label()
+            update_balance_label_local()
         except requests.exceptions.RequestException as e:
             messagebox.showerror("", f"No Internet")
             pass
@@ -244,7 +258,7 @@ def make_bet_dozen(value, bet):
             
             # update balance local
             balance -= amount 
-            update_balance_label()
+            update_balance_label_local()
         except requests.exceptions.RequestException as e:
             messagebox.showerror("", f"No Internet")
             pass
@@ -274,7 +288,7 @@ def make_bet_color(value, bet):
             
             # update balance local
             balance -= amount 
-            update_balance_label()
+            update_balance_label_local()
         except requests.exceptions.RequestException as e:
             messagebox.showerror("", f"No Internet")
             pass  
@@ -304,7 +318,7 @@ def make_bet_parity(value, bet):
             
             # update balance local
             balance -= amount 
-            update_balance_label()
+            update_balance_label_local()
         except requests.exceptions.RequestException as e:
             messagebox.showerror("", f"No Internet")
             pass
@@ -316,13 +330,13 @@ def make_bet_parity(value, bet):
     
     
 # UPDATES  ------------------------------
-def update_balance_label():
-    balance_label.config(text=f"Balance: {str(balance)}")
-    
-def update_balance(server_balance):
+def update_balance_label(server_balance):
     global balance
-    balance += server_balance
-    update_balance_label()
+    balance = server_balance
+    balance_label.config(text=f"Balance: {str(server_balance)}")
+def update_balance_label_local():
+    balance_label.config(text=f"Balance: {str(int(balance))}")
+    
     
     
 def update_random_label(random):
@@ -351,7 +365,7 @@ async def listen_for_updates():
                 
                 if is_update == 1:
                 
-                    server_update = data['balance']
+                    server_balance = data['balance']
                     win = data['win']
                     user_from_server = data['user_id']
                     
@@ -360,8 +374,8 @@ async def listen_for_updates():
                             result_func(0)
                         elif 1 == win:
                             result_func(1)
+                    update_balance_label(server_balance)
                     
-                    update_balance(server_update)
                 update_random_label(int(result))
                 
             except websockets.ConnectionClosed:
@@ -491,9 +505,9 @@ def open_game_window():
     empty_label.grid(column=0, row=10)
     empty_label.config(font=("Courier", 86))
     
-    empty_label = ttk.Label(Entrys, text=f"   ")
+    empty_label = ttk.Label(Entrys, text=f"Name: {name}")
     empty_label.grid(column=0, row=11)
-    empty_label.config(font=("Courier", 36))
+    empty_label.config(font=("Courier", 16))
 
 
 

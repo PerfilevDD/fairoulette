@@ -20,12 +20,18 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
     return db.query(models.User).offset(skip).limit(limit).all()
 
 
-def create_user(db: Session, name: str):
-    db_user = models.User(name=name, balance = 100.0)
+def create_user(db: Session, name: str, passw: str):
+    db_user = models.User(name=name, balance = 100.0, passw = passw)
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
+
+def check_passw(db: Session, name: str, passw: str):
+    user = db.query(models.User).filter(models.User.name == name).first()
+    if user and user.passw == passw:
+        return True
+    return False
 
 def check_if_user_has_open_bet(db: Session, user_id: int, table_id: int):
     bet = db.query(models.Bet) \

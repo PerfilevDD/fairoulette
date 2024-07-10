@@ -26,6 +26,7 @@ class Bet(BetBase):
 # User
 class UserBase(BaseModel):
     name: str
+    passw: str
 
 
 class UserCreate(UserBase):

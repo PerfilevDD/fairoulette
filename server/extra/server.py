@@ -31,7 +31,6 @@ async def run_roulette_game(db: Session):
             result_random = table.calculate_result()
             results[table.get_table_id() - 1] = result_random
             print(f"Table: {table.get_table_id()} - Result: {result_random}")
-            balance_to_client = 0
             win_client = 2
             
             # Bets
@@ -39,26 +38,29 @@ async def run_roulette_game(db: Session):
                 received = bet.calculate_result(result_random)
                 placed_sum = bet.get_bet_worth()
                 print("Bet", bet.get_bet_id(), "for user ID ", bet.get_user_id() ,"placed", placed_sum, "and received", received)
+                user_db = crud.get_user_id(db, bet.get_user_id())
                 if received > 0:
-                    print("Updating balance")
+                    #print("Updating balance")
                     crud.process_bet(db, bet.get_bet_id(), bet.get_user_id(), table.get_table_id(), received)
-                    balance_to_client = received
+                    print(f"User {user_db.name} won and have balance: {user_db.balance}")
                     win_client = 1
                 else:
+                    crud.process_bet(db, bet.get_bet_id(), bet.get_user_id(), table.get_table_id(), -placed_sum)
                     win_client = 0
                     # Websocket
                     
 
                 for client in clients:
-                    await update_user(client, win_client, balance_to_client, bet, result_random)
+                    await update_user(client, win_client, user_db.balance, bet, result_random)
+                    
 
             await update_random_clint(result_random)
             
             crud.close_all_open_bets(db=db)
 
 
-async def update_user(client, win_client, balance_to_client, bet, result_random):
-    data = {"is_update": 1, "result": result_random, "balance": balance_to_client, "win": win_client, 'user_id': bet.get_user_id()}
+async def update_user(client, win_client, balance, bet, result_random):
+    data = {"is_update": 1, "result": result_random, "balance": balance, "win": win_client, 'user_id': bet.get_user_id()}
     try:
         await client.send_text(json.dumps(data))
     except Exception as e:
@@ -117,7 +119,11 @@ async def websocket_endpoint(websocket: WebSocket):
 # create new user
 @app.post("/users", response_model=schemas.User, tags=["User"])
 def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
-    return crud.create_user(db=db, name=user.name)
+    db_user = crud.get_user_name(db, user.name)
+    if db_user == None:
+        return crud.create_user(db=db, name=user.name, passw=user.passw)
+    else:
+        raise HTTPException(status_code=401, detail="Incorrect password")
 
 
 # get bet from user
@@ -178,11 +184,14 @@ def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
 
 
 @app.get("/users/{name}", response_model=schemas.User, tags=["User"])
-def read_user(name: str, db: Session = Depends(get_db)):
+def read_user(name: str, passw: str, db: Session = Depends(get_db)):
     db_user = crud.get_user_name(db, name)
     if db_user is None:
-        raise HTTPException(status_code=404, detail="User not found")
-    return db_user
+        raise HTTPException(status_code=404, detail="Not found")
+    if crud.check_passw(db, name, passw):
+        return db_user
+    else:
+        raise HTTPException(status_code=401, detail="Incorrect password")
 
 
 # give a result to user

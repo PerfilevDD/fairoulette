@@ -9,6 +9,7 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True)
     balance = Column(Integer) # Guthaben in cent
+    passw = Column(String)
     
 class Bet(Base):
     __tablename__ = "bet"

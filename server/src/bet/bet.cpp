@@ -1,7 +1,8 @@
 #include "bet/bet.hpp"
+#include <iostream>
 
 bool _is_even(int number) {
-    return number % 2 == 0;
+    return (number % 2) == 0;
 }
 
 namespace Fairoulette {
@@ -86,6 +87,7 @@ namespace Fairoulette {
         if (number == 0)
             return balance;
 
+        std::cout << "Is it even? " << !_is_even(number) << " " << _is_even(number) << std::endl;
         // Add Odd/Even
         if (_is_even(number)){
             balance += outside_bets.even * 2;
@@ -95,9 +97,10 @@ namespace Fairoulette {
 
         // Add Red/Black
         if (
-            (number <= 9 && !_is_even(number)) ||
-            (number > 9 && number <= 18 && _is_even(number)) ||
-            (number > 18 && number <= 36 && !_is_even(number))
+            (number <= 10 && !_is_even(number)) ||
+            (number > 10 && number <= 18 && _is_even(number)) ||
+            (number > 18 && number <= 27 && !_is_even(number)) ||
+            (number > 28 && number <= 36 && _is_even(number))
         ) {
             balance += outside_bets.red * 2;
         } else {

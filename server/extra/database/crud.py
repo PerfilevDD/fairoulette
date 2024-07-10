@@ -70,7 +70,9 @@ def process_bet(db: Session, bet_id, user_id, table_id, earnings: int):
         bet_earnings=earnings,
     )
 
-    user.balance += earnings
+    if earnings > 0:
+        user.balance += earnings
+
     bet.completed = True
 
     db.add(db_balance_history)

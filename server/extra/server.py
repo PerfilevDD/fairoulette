@@ -24,6 +24,7 @@ round_duration: int = 5
 
 clients = []
 
+
 async def run_roulette_game(db: Session):
     while True:
         await asyncio.sleep(round_duration)
@@ -32,43 +33,42 @@ async def run_roulette_game(db: Session):
             results[table.get_table_id() - 1] = result_random
             print(f"Table: {table.get_table_id()} - Result: {result_random}")
             win_client = 2
-            
+
             # Bets
             for bet in table.get_and_clear_bets():
                 received = bet.calculate_result(result_random)
                 placed_sum = bet.get_bet_worth()
-                print("Bet", bet.get_bet_id(), "for user ID ", bet.get_user_id() ,"placed", placed_sum, "and received", received)
+                print("Bet", bet.get_bet_id(), "for user ID ", bet.get_user_id(), "placed", placed_sum, "and received",
+                      received)
                 user_db = crud.get_user_id(db, bet.get_user_id())
                 if received > 0:
-                    #print("Updating balance")
+                    # print("Updating balance")
                     crud.process_bet(db, bet.get_bet_id(), bet.get_user_id(), table.get_table_id(), received)
                     print(f"User {user_db.name} won and have balance: {user_db.balance}")
                     win_client = 1
                 else:
-                    crud.process_bet(db, bet.get_bet_id(), bet.get_user_id(), table.get_table_id(), -placed_sum)
                     win_client = 0
                     # Websocket
-                    
 
                 for client in clients:
-                    await update_user(client, win_client, user_db.balance, bet, result_random)
-                    
+                    await update_user(client, win_client, user_db.balance, bet, results)
 
-            await update_random_clint(result_random)
-            
+            await update_random_clint(results)
+
             crud.close_all_open_bets(db=db)
 
 
-async def update_user(client, win_client, balance, bet, result_random):
-    data = {"is_update": 1, "result": result_random, "balance": balance, "win": win_client, 'user_id': bet.get_user_id()}
+async def update_user(client, win_client, balance, bet, results):
+    data = {"is_update": 1, "results": results, "balance": balance, "win": win_client, 'user_id': bet.get_user_id()}
     try:
         await client.send_text(json.dumps(data))
     except Exception as e:
         clients.remove(client)
-        
-async def update_random_clint(result_random):
+
+
+async def update_random_clint(results):
     for client in clients:
-        data = {"is_update": 0,"result": result_random}
+        data = {"is_update": 0,"results": results}
         try:
             await client.send_text(json.dumps(data))
         except Exception as e:
@@ -105,7 +105,8 @@ def get_db():
     finally:
         db.close()
 
-# Websocket to send a data on client 
+
+# Websocket to send a data on client
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
@@ -115,6 +116,7 @@ async def websocket_endpoint(websocket: WebSocket):
             await websocket.receive_text()
     except Exception as e:
         clients.remove(websocket)
+
 
 # create new user
 @app.post("/users", response_model=schemas.User, tags=["User"])
@@ -129,7 +131,6 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
 # get bet from user
 @app.post("/bet", response_model=schemas.Bet, tags=["Bet"])
 def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
-
     db_bet = crud.check_if_user_has_open_bet(db=db, user_id=bet.user_id, table_id=bet.table_id)
 
     if db_bet:
@@ -143,7 +144,8 @@ def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
 
     else:
         print("User created a new bet.")
-        db_bet = crud.create_bet(db=db, user_id=bet.user_id, table_id=bet.table_id, type=bet.type, value=bet.value, amount=bet.amount)
+        db_bet = crud.create_bet(db=db, user_id=bet.user_id, table_id=bet.table_id, type=bet.type, value=bet.value,
+                                 amount=bet.amount)
         bet_obj = Bet(bet.user_id, db_bet.id)
 
     user = crud.get_user_id(db, bet.user_id)
@@ -155,10 +157,9 @@ def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
         )
 
     user.balance -= bet.amount
+    db.commit()
 
-
-
-# bet's types
+    # bet's types
     if 'number' == bet.type:
         bet_obj.add_number_bet(int(bet.value), bet.amount)
     elif 'col' == bet.type:
@@ -175,12 +176,10 @@ def create_bet(bet: schemas.BetBase, db: Session = Depends(get_db)):
             bet_obj.add_red_bet(bet.amount)
         else:
             bet_obj.add_black_bet(bet.amount)
-        
+
     tables[bet.table_id].add_or_update_bet_by_bet_id(db_bet.id, bet_obj)
 
     return db_bet
-
-
 
 
 @app.get("/users/{name}", response_model=schemas.User, tags=["User"])
@@ -206,12 +205,13 @@ def get_result(user_id: int, db: Session = Depends(get_db)):
 async def post_random(table_id: int):
     return {'result': results[table_id - 1]}
 
+
 @app.get("/tables", tags=["Table"])
 async def get_tables(db: Session = Depends(get_db)):
-
     return {
         "tables": [table.id for table in crud.get_tables(db)]
     }
+
 
 @app.post("/table", tags=["Table"])
 async def create_table(db: Session = Depends(get_db)):
@@ -219,15 +219,16 @@ async def create_table(db: Session = Depends(get_db)):
     return {
         "table": table.id
     }
+
+
 @app.get("/", include_in_schema=False)
 async def redirect():
     return RedirectResponse(url="/docs")
 
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-rd', '--round_duration', type=int,  default=30)
+    parser.add_argument('-rd', '--round_duration', type=int, default=30)
     parser.add_argument('-p', '--port', type=int, default=8000, help="The port on which the api will be accessible.")
     parser.add_argument('-ho', '--host', default="localhost", help="The host on which the api will be accessible.")
     args = parser.parse_args()

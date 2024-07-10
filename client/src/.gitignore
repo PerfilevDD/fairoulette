@@ -1,1 +1,4 @@
 calculator.cpython*
+build/
+dist/
+env/

@@ -361,7 +361,8 @@ async def listen_for_updates():
                 message = await websocket.recv()
                 data = json.loads(message)
                 is_update = data["is_update"]
-                result = data['result']
+                
+                result = data['results'][table_id-1]
                 
                 if is_update == 1:
                 
@@ -540,7 +541,7 @@ def open_game_window():
     frame_buttons.grid_columnconfigure((0,1), weight = 1)
     frame_buttons.grid_rowconfigure(0, weight = 1)
     
-    black = [1,3,5,7,9,11,13,15,17,19,21,23,25,27,29,31,33,35]
+    black = [2,4,6,8,10,11,13,15,17,20,22,24,26,28,29,31,33,35]
     f_row = [3,6,9,12,15,18,21,24,27,30,33,36]
     s_row = [2,5,8,11,14,17,20,23,26,29,32,35]
     th_row = [1,4,7,10,13,16,19,22,25,28,31,34]

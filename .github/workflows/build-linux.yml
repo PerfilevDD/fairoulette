@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Build Client
+name: Build Linux Client
 
 on:
   push
@@ -24,5 +24,5 @@ jobs:
           python_ver: '3.11'
           spec: 'client/src/client.py'
           requirements: 'requirements.txt'
-          upload_exe_with_name: 'fairoulette_client'
+          upload_exe_with_name: 'fairoulette_client_linux'
           options: --onefile, --name "Fairoulette", --windowed, 

@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 jobs:
-  pyinstaller-build:
+  build-macos:
     runs-on: macos-latest
     steps:
       - name: Create Executable

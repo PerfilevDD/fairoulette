@@ -15,7 +15,7 @@ permissions:
   contents: read
 
 jobs:
-  pyinstaller-build:
+  build-linux:
     runs-on: ubuntu-latest
     steps:
       - name: Create Executable

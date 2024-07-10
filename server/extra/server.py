@@ -47,18 +47,30 @@ async def run_roulette_game(db: Session):
                 else:
                     win_client = 0
                     # Websocket
+                    
 
                 for client in clients:
-                    data = {"result": result_random, "balance": balance_to_client, "win": win_client, 'user_id': bet.get_user_id()}
-                    try:
-                        await client.send_text(json.dumps(data))
-                    except Exception as e:
-                        clients.remove(client)
+                    await update_user(client, win_client, balance_to_client, bet, result_random)
 
-
+            await update_random_clint(result_random)
+            
             crud.close_all_open_bets(db=db)
 
 
+async def update_user(client, win_client, balance_to_client, bet, result_random):
+    data = {"is_update": 1, "result": result_random, "balance": balance_to_client, "win": win_client, 'user_id': bet.get_user_id()}
+    try:
+        await client.send_text(json.dumps(data))
+    except Exception as e:
+        clients.remove(client)
+        
+async def update_random_clint(result_random):
+    for client in clients:
+        data = {"is_update": 0,"result": result_random}
+        try:
+            await client.send_text(json.dumps(data))
+        except Exception as e:
+            clients.remove(client)
 
 
 @asynccontextmanager

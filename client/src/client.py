@@ -346,20 +346,23 @@ async def listen_for_updates():
             try:
                 message = await websocket.recv()
                 data = json.loads(message)
-                
+                is_update = data["is_update"]
                 result = data['result']
-                server_update = data['balance']
-                win = data['win']
-                user_from_server = data['user_id']
                 
-                if(user_from_server == user_id):
-                    if 0 == win:
-                        result_func(0)
-                    elif 1 == win:
-                        result_func(1)
+                if is_update == 1:
                 
+                    server_update = data['balance']
+                    win = data['win']
+                    user_from_server = data['user_id']
+                    
+                    if(user_from_server == user_id):
+                        if 0 == win:
+                            result_func(0)
+                        elif 1 == win:
+                            result_func(1)
+                    
+                    update_balance(server_update)
                 update_random_label(int(result))
-                update_balance(server_update)
                 
             except websockets.ConnectionClosed:
                 break

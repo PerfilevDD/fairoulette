@@ -44,10 +44,9 @@ async def run_roulette_game(db: Session):
                 if received > 0:
                     # print("Updating balance")
                     crud.process_bet(db, bet.get_bet_id(), bet.get_user_id(), table.get_table_id(), received)
-                    print(f"User {user_db.name} won and have balance: {user_db.balance}")
+                    print(f"User {user_db.name} won and has balance: {user_db.balance}")
                     win_client = 1
                 else:
-                    crud.process_bet(db, bet.get_bet_id(), bet.get_user_id(), table.get_table_id(), -placed_sum)
                     win_client = 0
                     # Websocket
 

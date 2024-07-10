@@ -362,7 +362,12 @@ async def listen_for_updates():
                 data = json.loads(message)
                 is_update = data["is_update"]
                 result = data['result']
-                
+                msg_table_id = data["table_id"]
+
+                # Skip update if it doesn't match the current table
+                if table_id != msg_table_id:
+                    continue
+
                 if is_update == 1:
                 
                     server_balance = data['balance']

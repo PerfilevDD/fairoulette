@@ -47,7 +47,6 @@ async def run_roulette_game(db: Session):
                     print(f"User {user_db.name} won and have balance: {user_db.balance}")
                     win_client = 1
                 else:
-                    crud.process_bet(db, bet.get_bet_id(), bet.get_user_id(), table.get_table_id(), -placed_sum)
                     win_client = 0
                     # Websocket
 

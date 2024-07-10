@@ -112,7 +112,7 @@ def register_user():
             login_window.destroy()
             open_table_window()
         except requests.exceptions.RequestException as e:
-            messagebox.showerror("", f"{e.response.json()["detail"]}")
+            messagebox.showerror("", f"{e.response.json()['detail']}")
 
 
 # Tables

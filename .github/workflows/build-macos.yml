@@ -25,4 +25,4 @@ jobs:
           spec: 'client/src/client.py'
           requirements: 'requirements.txt'
           upload_exe_with_name: 'fairoulette_client_macos'
-          options: --onefile, --name "Fairoulette", --windowed, 
+          options: --onefile, --name "Fairoulette", --windowed, --hidden-import="PIL._tkinter_finder",

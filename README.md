@@ -2,7 +2,7 @@
 # https://fairoulette.ctrl-felix.de
 
 # LINK FOR GITHUB REPO:
-# t.ly/QkICP
+# https://t.ly/QkICP
 ![image](https://github.com/PerfilevDD/fairoulette/assets/40623804/a28d46f7-bbaa-49de-bb69-ed155a8a0b70)
 
 

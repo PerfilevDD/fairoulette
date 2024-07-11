@@ -24,7 +24,7 @@ jobs:
         python -m venv venv
         source venv/bin/activate
         pip install --upgrade pip
-        pip install -r requirements
+        pip install -r requirements.txt
 
     - name: Build client.py
       run: |
@@ -55,7 +55,7 @@ jobs:
         python -m venv venv
         .\venv\Scripts\activate
         pip install --upgrade pip
-        pip install -r requirements
+        pip install -r requirements.txt
 
     - name: Build client.py
       run: |

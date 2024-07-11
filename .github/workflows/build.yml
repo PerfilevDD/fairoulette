@@ -1,0 +1,70 @@
+name: Build Client
+
+on:
+  push:
+    branches:
+      - main
+      - 'feat/**'
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'  # Specify the Python version here
+
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        source venv/bin/activate
+        pip install --upgrade pip
+        pip install -r requirements
+
+    - name: Build client.py
+      run: |
+        source venv/bin/activate
+        cd client/src
+        ../../venv/bin/pyinstaller --onefile --hidden-import='PIL._tkinter_finder' client.py
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: client-linux
+        path: client/src/dist/client
+
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'  # Specify the Python version here
+
+    - name: Install dependencies
+      run: |
+        python -m venv venv
+        .\venv\Scripts\activate
+        pip install --upgrade pip
+        pip install -r requirements
+
+    - name: Build client.py
+      run: |
+        .\venv\Scripts\activate
+        cd client\src
+        ..\..\venv\Scripts\pyinstaller --onefile --hidden-import='PIL._tkinter_finder' client.py
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: client-windows
+        path: client\src\dist\client.exe

@@ -2,8 +2,13 @@ from sqlalchemy import and_, update
 from sqlalchemy.orm import Session
 
 import database.models as models
-import database.schemas as schemas
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 
+
+def hash_password(password):
+    ph = PasswordHasher()
+    return ph.hash(password)
 
 def get_user_name(db: Session, name: str):
     return db.query(models.User).filter(models.User.name == name).first()
@@ -21,16 +26,21 @@ def get_users(db: Session, skip: int = 0, limit: int = 100):
 
 
 def create_user(db: Session, name: str, passw: str):
-    db_user = models.User(name=name, balance = 100.0, passw = passw)
+    db_user = models.User(name=name, balance = 100.0, passw = hash_password(passw))
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
     return db_user
 
-def check_passw(db: Session, name: str, passw: str):
+def check_passw(db: Session, name: str, input_passw: str):
     user = db.query(models.User).filter(models.User.name == name).first()
-    if user and user.passw == passw:
-        return True
+    ph = PasswordHasher()
+    if user:
+        try:
+            return ph.verify(user.passw, input_passw)
+        except VerifyMismatchError:
+            pass
+        
     return False
 
 def check_if_user_has_open_bet(db: Session, user_id: int, table_id: int):

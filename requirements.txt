@@ -8,3 +8,4 @@ uvicorn
 requests
 pillow
 webpocket
+argon2-cffi

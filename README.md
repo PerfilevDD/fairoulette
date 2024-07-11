@@ -1,5 +1,5 @@
 # LINK FOR CLIENT (with https etc.): 
-# https://fairoulette.ctrl-felix.de/
+# https://fairoulette.ctrl-felix.de
 
 # LINK FOR GITHUB REPO:
 # t.ly/QkICP

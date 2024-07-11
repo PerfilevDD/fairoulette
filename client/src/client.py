@@ -1,3 +1,4 @@
+import os
 from tkinter import *
 from tkinter import ttk
 from tkinter import messagebox
@@ -416,8 +417,7 @@ def result_func(res):
     gif_label.grid(column=2, row=10)
     
     if res:
-        gif_path = "../assets/data/fairoulette/win.gif"
-        gif_image = Image.open(gif_path)
+        gif_image = Image.open(requests.get("https://assets.interbloc.org/images/fairoulette/win.gif", stream=True).raw)
         frames = []
         try:
             while True:
@@ -428,7 +428,7 @@ def result_func(res):
             pass
         update_gif(gif_label, frames, 0)
     else:
-        loss_im = Image.open("../assets/data/fairoulette/loss.jpg").resize((600, 380))
+        loss_im = Image.open(requests.get("https://assets.interbloc.org/images/fairoulette/loss.jpg", stream=True).raw).resize((600, 380))
         loss = ImageTk.PhotoImage(loss_im)
         gif_label.configure(image=loss)
         gif_label.image = loss
@@ -471,12 +471,10 @@ def open_game_window():
     
     
     # Images
-               
-    wheel_path = Image.open("../assets/data/fairoulette/wheel.png")
-    wheel = ImageTk.PhotoImage(wheel_path) 
-    loss_im = Image.open("../assets/data/fairoulette/wheel.png")
-    loss = ImageTk.PhotoImage(loss_im) 
-    
+    img_raw = Image.open(requests.get(url="https://assets.interbloc.org/images/fairoulette/wheel.png", stream=True).raw)
+    loss = ImageTk.PhotoImage(img_raw)
+    wheel = ImageTk.PhotoImage(img_raw)
+
      
     # Labels 
      

@@ -70,3 +70,52 @@ jobs:
       with:
         name: client-windows
         path: client\src\dist\client.exe
+  create-release:
+    needs: [ build-linux, build-windows ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: client-linux
+          path: ./dist/client-linux
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v2
+        with:
+          name: client-windows
+          path: ./dist/client-windows
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Linux Build to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/client-linux/client
+          asset_name: client-linux
+          asset_content_type: application/octet-stream
+
+      - name: Upload Windows Build to Release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/client-windows/client.exe
+          asset_name: client-windows.exe
+          asset_content_type: application/octet-stream
